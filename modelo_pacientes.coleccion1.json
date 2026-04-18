@@ -1,0 +1,1000 @@
+[{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd008"
+  },
+  "Edad": 15,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 50.12,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.98,
+  "Clasificación cariotipo": "Anormal",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 91,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd009"
+  },
+  "Edad": 17,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 29.57,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 95,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd00a"
+  },
+  "Edad": 6,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 130.85,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 87,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd00b"
+  },
+  "Edad": 17,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 3.59,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 74,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd00c"
+  },
+  "Edad": 3,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 20.85,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.96,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 82,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Defunción",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd00d"
+  },
+  "Edad": 5,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 250.59,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.87,
+  "Clasificación cariotipo": "Anormal",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 94,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd00e"
+  },
+  "Edad": 17,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 1.45,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 0.2,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd00f"
+  },
+  "Edad": 16,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 0.68,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "M",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 92,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd010"
+  },
+  "Edad": 10,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 4.34,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 4,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd011"
+  },
+  "Edad": 9,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 1.39,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 35,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd012"
+  },
+  "Edad": 9,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 0.52,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "Anormal",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 13,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd013"
+  },
+  "Edad": 3,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 6.02,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "T",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 11,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd014"
+  },
+  "Edad": 17,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 2.71,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "T",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 5,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd015"
+  },
+  "Edad": 15,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 2.05,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "Anormal",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 15,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd016"
+  },
+  "Edad": 17,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 1.83,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "T",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 7.000000000000001,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Otra enfermedad",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd017"
+  },
+  "Edad": 12,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 3.88,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "M",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 0.33999999999999997,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Otra enfermedad",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd018"
+  },
+  "Edad": 2,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 4.62,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 5,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd019"
+  },
+  "Edad": 16,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 4.62,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.91,
+  "Clasificación cariotipo": "Anormal",
+  "Biología molecular": "Desfavorable",
+  "GATE Inmunofenotipo": 71,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd01a"
+  },
+  "Edad": 11,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 13.77,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.86,
+  "Clasificación cariotipo": "Anormal",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 92,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd01b"
+  },
+  "Edad": 6,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 1.02,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "T",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 2,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Otra enfermedad",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd01c"
+  },
+  "Edad": 2,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 3.13,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "Anormal",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 22,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd01d"
+  },
+  "Edad": 17,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 1.83,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 64,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Defunción",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd01e"
+  },
+  "Edad": 14,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 520.29,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.44,
+  "Clasificación cariotipo": "Anormal",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 95,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd01f"
+  },
+  "Edad": 5,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 0.83,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 0.4,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd020"
+  },
+  "Edad": 7,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 1.5,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "M",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "Anormal",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 76,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Defunción",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd021"
+  },
+  "Edad": 6,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 4.35,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 68,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd022"
+  },
+  "Edad": 13,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 7.7,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.81,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 98,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd023"
+  },
+  "Edad": 14,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 1.98,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.1,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 46,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd024"
+  },
+  "Edad": 4,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 3.59,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.04,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 50,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd025"
+  },
+  "Edad": 16,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 107.8,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "T",
+  "Número de blastos": 1,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 97,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd026"
+  },
+  "Edad": 9,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 1.68,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 78,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd027"
+  },
+  "Edad": 2,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 5.51,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 3,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd028"
+  },
+  "Edad": 10,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 14.5,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 84,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd029"
+  },
+  "Edad": 13,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 11.24,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "T",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 66,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd02a"
+  },
+  "Edad": 10,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 3.41,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 0.7000000000000001,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd02b"
+  },
+  "Edad": 15,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 27.07,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.57,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 80,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd02c"
+  },
+  "Edad": 11,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 34.6,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 96,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd02d"
+  },
+  "Edad": 7,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 61.57,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.75,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 78,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd02e"
+  },
+  "Edad": 17,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 3.31,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.15,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 68,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd02f"
+  },
+  "Edad": 6,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 4.85,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 59,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd030"
+  },
+  "Edad": 13,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 0.76,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 80,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd031"
+  },
+  "Edad": 13,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 3.13,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 84,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd032"
+  },
+  "Edad": 16,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 87.78,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.9,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 96,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd033"
+  },
+  "Edad": 9,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 70,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.17,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 79,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd034"
+  },
+  "Edad": 3,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 12.33,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0.75,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 87,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd035"
+  },
+  "Edad": 3,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 2.34,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 30,
+  "Tipo infiltración": "Moderada moderada",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd036"
+  },
+  "Edad": 5,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 2.5,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 93,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Defunción",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd037"
+  },
+  "Edad": 14,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 264.87,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "M",
+  "Número de blastos": 0.03,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Desfavorable",
+  "GATE Inmunofenotipo": 95,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd038"
+  },
+  "Edad": 17,
+  "Sexo": "F",
+  "Número de Leucocitos al inicio": 3.74,
+  "Riesgo calculado": "Riesgo alto",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 0.4,
+  "Tipo infiltración": "Baja infiltración",
+  "Resistencia al tratamiento": false,
+  "Estado del paciente": "Cuidados paliativos",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "69dadd97c9d19173299bd039"
+  },
+  "Edad": 5,
+  "Sexo": "M",
+  "Número de Leucocitos al inicio": 3.22,
+  "Riesgo calculado": "Riesgo estandar",
+  "Tipo leucemia": "B",
+  "Número de blastos": 0,
+  "Clasificación cariotipo": "No detectado",
+  "Biología molecular": "Favorable",
+  "GATE Inmunofenotipo": 90,
+  "Tipo infiltración": "Alta infiltración",
+  "Resistencia al tratamiento": true,
+  "Estado del paciente": "Tratamiento",
+  "fecha_registro": {
+    "$date": "2026-04-11T17:47:35.688Z"
+  }
+}]

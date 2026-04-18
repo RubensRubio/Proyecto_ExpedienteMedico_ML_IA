@@ -6,3 +6,11 @@ __pycache__/
 .env
 .DS_Store
 data/*xlsx
+
+#Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# MongoDB local
+*.db
