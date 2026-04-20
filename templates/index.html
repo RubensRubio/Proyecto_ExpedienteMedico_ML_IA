@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente Clínico - Predicción de Estado del Paciente</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 Asistente Clínico</h1>
+            <p>Sistema de predicción de estado clínico basado en ML</p>
+        </header>
+
+        <main>
+            <div class="tabs">
+                <button class="tab-button active" data-tab="tab-cargar">
+                    📤 Cargar Archivo
+                </button>
+                <button class="tab-button" data-tab="tab-paciente">
+                    ➕ Nuevo Paciente
+                </button>
+            </div>
+
+            <div id="tab-cargar" class="tab-content active">
+                <h2>Opcion 1: Cargar archivo</h2>
+                <p>Sube un archivo .xlsx, .xls o .csv con datos de pacientes</p>
+
+                <div class="form-group">
+                    <input type="file" id="file-input" accept=".xlsx,.xls,.csv" required>
+                </div>
+
+                <button id="btn-cargar" class="btn btn-primary">
+                    📤 Subir y Guardar
+                </button>
+
+                <div id="resultado-carga" class="resultado"></div>
+            </div>
+
+            <div id="tab-paciente" class="tab-content">
+                <h2>Opcion 2: Registrar nuevo paciente</h2>
+                <p>Ingresa los datos del paciente manualmente</p>
+
+                <form id="form-paciente" class="form-paciente">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Edad*</label>
+                            <input type="number" name="Edad" min="0" max="120" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Sexo*</label>
+                            <select name="Sexo" required>
+                                <option value="">Selecciona</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Número de leucocitos al inicio *</label>
+                            <input type="number" name="Leucocitos" step="0.01" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Riesgo calculado *</label>
+                            <select name="Riesgo calculado" required>
+                                <option value="">Seleccionar</option>
+                                <option value="Riesgo alto">Riesgo alto</option>
+                                <option value="Riesgo estandar">Riesgo estandar</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo leucemia</label>
+                            <select name="Tipo leucemia" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="B">B</option>
+                                <option value="T">T</option>
+                                <option value="M">M</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Número de blastos *</label>
+                            <input type="number" name="Número de blastos" step="0.01" min="0" max="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Clasificación cariotipo *</label>
+                            <select name="Clasificación cariotipo" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Normal">Normal</option>
+                                <option value="Anormal">Anormal</option>
+                                <option value="No detectado">No detectado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Biología molecular *</label>
+                            <select name="Biología molecular" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Favorable">Favorable</option>
+                                <option value="Desfavorable">Desfavorable</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>GATE Inmunofenotipo *</label>
+                            <input type="number" name="GATE Inmunofenotipo" step="0.01" min="0" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Tipo infiltración *</label>
+                            <select name="Tipo infiltración" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Baja infiltración">Baja infiltración</option>
+                                <option value="Moderada moderada">Moderada</option>
+                                <option value="Alta infiltración">Alta infiltración</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Resistencia al tratamiento *</label>
+                            <select name="Resistencia al tratamiento" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="false">No (false)</option>
+                                <option value="true">Sí (true)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        ➕ Guardar Paciente
+                    </button>
+
+                </form>
+                <div id="resultado-paciente" class="resultado"></div>
+            </div>
+
+            <hr>
+            <div class="operaciones">
+                <h2>Operaciones del modelo</h2>
+
+                <div class="botones-operaciones">
+                    <button id="btn-entrenar" class="btn btn-info">
+                        🤖 Entrenar Modelo
+                    </button>
+
+                    <button id="btn-predecir" class="btn btn-success">
+                        🎯 Realizar Predicción
+                    </button>
+                </div>
+
+                <div id="resultado-entrenamiento" class="resultado"></div>
+                <div id="resultado-prediccion" class="resultado"></div>
+            </div>
+
+        </main>
+
+        <footer>
+            <p>Asistente clínico MVP © 2026</p>
+        </footer>
+
+    </div>
+
+    <script src="/static/main.js"></script>
+
+</body>
+
+</html>

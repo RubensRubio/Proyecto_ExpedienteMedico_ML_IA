@@ -60,7 +60,7 @@ class ModeloPredictorEstadoPaciente:
         df_preparado = df.copy()
         
         y = df_preparado["Estado del paciente"]
-        X = df_preparado.drop(columns=["Estado del paciente"], axis=1)
+        X = df_preparado.drop(columns=["Estado del paciente"])
         
         if "fecha_registro" in X.columns:
             X = X.drop("fecha_registro", axis=1)
@@ -104,12 +104,19 @@ class ModeloPredictorEstadoPaciente:
         
         print("✂️  Dividiendo datos (80% entrenamiento, 20% prueba)...")
         
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y,
-            test_size=test_size,
-            random_state=random_state,
-            stratify=y
-        )
+        try:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y,
+                test_size=test_size,
+                random_state=random_state,
+                stratify=y
+            )
+        except ValueError:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X, y,
+                test_size=test_size,
+                random_state=random_state
+            )
         
         print(f"   • Entrenamiento: {X_train.shape[0]} registros")
         print(f"   • Prueba: {X_test.shape[0]} registros\n")
@@ -149,7 +156,7 @@ class ModeloPredictorEstadoPaciente:
         y_pred = self.modelo.predict(X_test)
         y_pred_proba = self.modelo.predict_proba(X_test)
         
-        accuracy = accurancy_score(y_test, y_pred)
+        accuracy = accuracy_score(y_test, y_pred)
         
         print("\n" + "=" * 70)
         print("RESULTADOS DE EVALUACIÓN")
@@ -157,7 +164,8 @@ class ModeloPredictorEstadoPaciente:
         print(f"\n🎯 Accuracy (precisión general): {accuracy:.2%}")
         
         print("\n📈 Reporte de clasificación:")
-        print(classification_report(y_test, y_pred, target_names=self.clases))
+        clases_presentes = sorted(y_test.unique().tolist())
+        print(classification_report(y_test, y_pred, target_names=clases_presentes))
         
         print("\n📉 Matriz de confusión:")
         cm = confusion_matrix(y_test, y_pred)
@@ -167,10 +175,10 @@ class ModeloPredictorEstadoPaciente:
         importancias = pd.DataFrame({
             'feature': X_test.columns,
             'importance': self.modelo.feature_importances_
-        }).sort_values('importancia', ascending=False)
+        }).sort_values('importance', ascending=False)
         
         for idx, row in importancias.head(5).iterrows():
-            print(f"   {row['feature']}: {row['importancia']:.4f}")
+            print(f"   {row['feature']}: {row['importance']:.4f}")
         
         print("\n" + "=" * 70 + "\n")
         
@@ -197,8 +205,7 @@ class ModeloPredictorEstadoPaciente:
             
             os.makedirs(os.path.dirname(ruta) if os.path.dirname(ruta) else '.', exist_ok=True)
 
-            joblib.dump(self.modelo, ruta)
-            
+            joblib.dump(self.modelo, ruta)       
             encoders_ruta = ruta.replace(".pkl", "_encoders.pkl")
             joblib.dump(self.encoders, encoders_ruta)
             
@@ -215,7 +222,7 @@ class ModeloPredictorEstadoPaciente:
             print(f"   ❌ Error al guardar el modelo: {e}\n")
             return False
         
-    def cargar(self, ruta: str = "modelo_predictor_estado.pkl") -> bool:
+    def cargar_modelo(self, ruta: str = "modelo_predictor_estado.pkl") -> bool:
         
         print(f"📂 Cargando modelo desde '{ruta}'...")
         
@@ -306,7 +313,7 @@ class ModeloPredictorEstadoPaciente:
                     "..", "modelos",
                     "modelo_predictor_estado.pkl"
                 )
-                self.guardar(ruta_modelo)
+                self.guardar_modelo(ruta_modelo)
                 
             print("  ✅ Pipeline completado con éxito\n")
             return True

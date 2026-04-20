@@ -47,8 +47,7 @@ class DatabaseManager:
             self.client.close()
             self.connected = False
             print("Desconectado de MongoDB.")
-            
-    
+             
     def guardar_paciente(self, paciente : Dict) -> bool:
         
         if not self.connected:
@@ -121,6 +120,9 @@ class DatabaseManager:
         except PyMongoError as e:
             print(f"Error al contar pacientes: {e}")
             return 0
+        
+    def obtener_datos_pacientes(self) -> pd.DataFrame:
+        return self.obtener_pacientes()
         
     def obtener_estadisticas(self) -> Dict:
         if not self.connected:
