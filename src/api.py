@@ -12,7 +12,7 @@ from .data_loader import load_excel, ensure_columns
 from .database import DatabaseManager
 from .ml_model_pacientes import ModeloPredictorEstadoPaciente
 from .language_generator import generar_respuesta_natural
-from .risk_classifier import clasificar_pacientes, preparar_pacientes_para_bd
+from .risk_classifier import clasificar_pacientes, preparar_pacientes_para_bd, clasificar_paciente, procesar_cariotipo, procesar_biologia_molecular, procesar_gate_inmunofenotipo, clasificar_tipo_infiltracion, procesar_marcadores_aberrantes
 
 #Cargar variables de entorno
 env_path = Path(__file__).parent / ".env"
@@ -210,7 +210,7 @@ async def entrenar_modelo():
 @app.post("/api/paciente/nuevo")
 async def crear_paciente(data : dict):
     
-    global db_manager
+    global db_manager, modelo
     
     try:
         if db_manager is None:
@@ -228,22 +228,159 @@ async def crear_paciente(data : dict):
                         "message": "Error al conectar a la base de datos"
                     }
                 )
-                
+        
+        # Validar y convertir campos requeridos
+        try:
+            data['Edad'] = float(data.get('Edad', 0))
+            data['Número de Leucocitos al inicio'] = float(data.get('Número de Leucocitos al inicio', 0))
+            data['Número de blastos'] = float(data.get('Número de blastos', 0))
+            data['GATE Inmunofenotipo'] = float(data.get('GATE Inmunofenotipo', 0))
+        except (ValueError, TypeError) as e:
+            print(f"Error al convertir campos numéricos: {e}")
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": f"Error en conversión de datos: {str(e)}"}
+            )
+        
+        # Calcular el riesgo automáticamente
+        try:
+            edad = data['Edad']
+            leucocitos = data['Número de Leucocitos al inicio']
+            
+            riesgo_edad, riesgo_leucos, riesgo_final = clasificar_paciente(edad, leucocitos)
+            data['Riesgo calculado'] = riesgo_final
+            
+            print(f"Riesgo calculado: Edad({edad}) → {riesgo_edad}, Leucos({leucocitos}) → {riesgo_leucos}, Final: {riesgo_final}")
+            
+        except Exception as e:
+            print(f"Error al calcular riesgo: {e}")
+            data['Riesgo calculado'] = "Riesgo estandar"
+        
+        # Procesar Tipo de leucemia (del campo Sexo si es que existe)
+        if 'Tipo leucemia' not in data and 'Sexo' in data:
+            data['Tipo leucemia'] = data.get('Sexo', '')
+        
+        # Procesar Clasificación cariotipo
+        cariotipo_valor = data.get('Clasificación cariotipo', '')
+        data['Clasificación cariotipo'] = procesar_cariotipo(cariotipo_valor)
+        print(f"Cariotipo: '{cariotipo_valor}' → {data['Clasificación cariotipo']}")
+        
+        # Procesar Biología molecular (puede estar vacía)
+        biologia_valor = data.get('Biología molecular', '')
+        data['Biología molecular'] = procesar_biologia_molecular(biologia_valor)
+        print(f"Biología: '{biologia_valor}' → {data['Biología molecular']}")
+        
+        # Calcular Tipo de infiltración basado en GATE
+        gate_num = data['GATE Inmunofenotipo']
+        data['Tipo infiltración'] = clasificar_tipo_infiltracion(gate_num)
+        print(f"Infiltración: GATE({gate_num}) → {data['Tipo infiltración']}")
+        
+        # Procesar Marcadores aberrantes (puede estar vacía)
+        marcadores_valor = data.get('Marcadores aberrantes', '')
+        data['Resistencia al tratamiento'] = procesar_marcadores_aberrantes(marcadores_valor)
+        print(f"Marcadores: '{marcadores_valor}' → Resistencia={data['Resistencia al tratamiento']}")
+        
+        # Asegurar que no hay valores None o NaN
+        for key in data:
+            if data[key] is None:
+                print(f"Advertencia: Campo '{key}' es None, se asignará valor por defecto")
+                if isinstance(key, str):
+                    data[key] = ""
+                elif isinstance(key, bool):
+                    data[key] = False
+                elif isinstance(key, (int, float)):
+                    data[key] = 0
+        
+        print(f"\nDatos finales para guardar: {data}\n")
+        
         paciente_guardado = db_manager.guardar_paciente(data)
         
-        if paciente_guardado:
-            return JSONResponse(
-                status_code=200,
-                content={"status": "success", "message": "Paciente guardado exitosamente"}
-            )
-        else:
+        if not paciente_guardado:
             return JSONResponse(
                 status_code=500,
                 content={"status": "error", "message": "Error al guardar el paciente"}
             )
         
+        # Entrenar el modelo automáticamente con los nuevos datos
+        print("\n" + "="*60)
+        modelo_entrenado = await _entrenar_modelo_interno()
+        print("="*60 + "\n")
+        
+        # Generar predicción en lenguaje natural para el nuevo paciente
+        respuesta_natural = None
+        print(f"\nDebug predicción:")
+        print(f"  modelo_entrenado: {modelo_entrenado}")
+        print(f"  modelo is not None: {modelo is not None}")
+        print(f"  hasattr(modelo, 'modelo'): {hasattr(modelo, 'modelo') if modelo is not None else 'N/A'}")
+        print(f"  modelo.modelo is not None: {modelo.modelo is not None if modelo is not None and hasattr(modelo, 'modelo') else 'N/A'}")
+        
+        if modelo_entrenado and modelo is not None and hasattr(modelo, 'modelo') and modelo.modelo is not None:
+            try:
+                # Obtener datos para predicción (convertir diccionario a DataFrame)
+                datos_prediccion = {k: v for k, v in data.items() if k not in ['_id', 'fecha_registro']}
+                
+                # Normalizar nombres de campos para que coincidan con los del entrenamiento
+                # El modelo fue entrenado con datos de MongoDB que puede tener diferentes nombres
+                mapeo_campos = {
+                    'Número de Leucocitos al inicio': 'Número de Leucocitos al inicio',
+                    'Leucocitos': 'Número de Leucocitos al inicio'
+                }
+                
+                # Renombrar campos si es necesario
+                datos_renombrados = {}
+                for key, value in datos_prediccion.items():
+                    nuevo_key = mapeo_campos.get(key, key)
+                    datos_renombrados[nuevo_key] = value
+                
+                print(f"Datos para predicción: {datos_renombrados}")
+                
+                df_prediccion = pd.DataFrame([datos_renombrados])
+                print(f"Columnas en DataFrame: {df_prediccion.columns.tolist()}")
+                print(f"Tipos en DataFrame: {df_prediccion.dtypes}")
+                
+                # Realizar predicción
+                prediccion = modelo.predecir(df_prediccion)
+                
+                if prediccion is not None:
+                    confianza = float(prediccion.get('confianza', 0))
+                    clase_predicha = prediccion.get('clase_predicha')
+                    probabilidades = prediccion.get('probabilidades', {})
+                    
+                    # Generar respuesta en lenguaje natural
+                    respuesta_natural = generar_respuesta_natural(
+                        clase_predicha, 
+                        confianza, 
+                        probabilidades, 
+                        datos_renombrados
+                    )
+                    
+                    print(f"Predicción generada: {clase_predicha} (confianza: {confianza:.2%})")
+                else:
+                    print("Advertencia: prediccion retornó None")
+                
+            except Exception as e:
+                print(f"Error al generar predicción: {e}")
+                import traceback
+                traceback.print_exc()
+                respuesta_natural = None
+        else:
+            print(f"No se puede hacer predicción. modelo_entrenado={modelo_entrenado}, modelo={modelo}, tiene método predecir={hasattr(modelo, 'modelo') if modelo else False}")
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "success", 
+                "mensaje": "Paciente guardado, modelo entrenado y predicción generada",
+                "riesgo_calculado": data.get('Riesgo calculado'),
+                "modelo_entrenado": modelo_entrenado,
+                "prediccion_natural": respuesta_natural
+            }
+        )
+        
     except Exception as e:
         print(f"Error al crear paciente: {e}")
+        import traceback
+        traceback.print_exc()
         return JSONResponse(
             status_code=500,
             content={"status": "error", "message": f"Error al crear paciente: {str(e)}"}

@@ -59,24 +59,69 @@ class ModeloPredictorEstadoPaciente:
         print("🔧 Preparando datos para el modelo...")
         df_preparado = df.copy()
         
+        print(f"   Filas originales: {len(df_preparado)}")
+        print(f"   Columnas: {df_preparado.columns.tolist()}")
+        
+        # Normalizar tipos de datos ANTES de rellenar NaN
+        print(f"\n   Normalizando tipos de datos...")
+        for col in df_preparado.columns:
+            # Convertir strings booleanos a booleanos reales
+            if col in ['Resistencia al tratamiento']:
+                df_preparado[col] = df_preparado[col].apply(
+                    lambda x: x if isinstance(x, bool) else (str(x).lower() == 'true' if pd.notna(x) else False)
+                )
+                print(f"      • {col}: Convertido a booleano")
+            
+            # Intentar convertir a números si es posible
+            elif col in ['Edad', 'Número de Leucocitos al inicio', 'Número de blastos', 'GATE Inmunofenotipo']:
+                try:
+                    df_preparado[col] = pd.to_numeric(df_preparado[col], errors='coerce')
+                    print(f"      • {col}: Convertido a numérico")
+                except:
+                    print(f"      • {col}: No se pudo convertir a numérico")
+        
+        print(f"\n   Rellenando valores NaN...")
+        for col in df_preparado.columns:
+            nan_count = df_preparado[col].isna().sum()
+            if nan_count > 0:
+                if df_preparado[col].dtype == 'bool' or col in ['Resistencia al tratamiento']:
+                    # Para booleanos, llenar con False
+                    df_preparado[col] = df_preparado[col].fillna(False).astype(bool)
+                    print(f"      • {col}: {nan_count} NaN → False (bool)")
+                elif df_preparado[col].dtype in ['int64', 'float64']:
+                    # Para números, llenar con 0
+                    df_preparado[col] = df_preparado[col].fillna(0)
+                    print(f"      • {col}: {nan_count} NaN → 0 (numérico)")
+                else:
+                    # Para strings, llenar con 'Desconocido'
+                    df_preparado[col] = df_preparado[col].fillna('Desconocido').astype(str)
+                    print(f"      • {col}: {nan_count} NaN → 'Desconocido' (string)")
+        
+        print(f"   Filas después de rellenar NaN: {len(df_preparado)}")
+        print(f"\n   Tipos finales de datos:\n{df_preparado.dtypes}")
+        
         y = df_preparado["Estado del paciente"]
         X = df_preparado.drop(columns=["Estado del paciente"])
         
         if "fecha_registro" in X.columns:
             X = X.drop("fecha_registro", axis=1)
+        
+        if "_id" in X.columns:
+            X = X.drop("_id", axis=1)
             
         print(f"   • Features (X): {X.shape}")
         print(f"   • Target (y): {y.shape}")
         
         self.features_numericas = X.select_dtypes(include=[np.number]).columns.tolist()
-        self.features_categoricas = X.select_dtypes(include=['object']).columns.tolist()
+        self.features_categoricas = X.select_dtypes(include=['object', 'bool']).columns.tolist()
         
         print(f"\n   Features numéricas ({len(self.features_numericas)}): {self.features_numericas}")
         print(f"   Features categóricas ({len(self.features_categoricas)}): {self.features_categoricas}")
         
         print(f"\n   Codificando variables categóricas...")
         for col in self.features_categoricas:
-            print(f"      • {col}: {X[col].unique()}")
+            unique_vals = X[col].unique()
+            print(f"      • {col}: {unique_vals[:5]}...")  # Solo mostrar primeros 5 valores
             le = LabelEncoder()
             X[col] = le.fit_transform(X[col].astype(str))
             self.encoders[col] = le
@@ -249,37 +294,94 @@ class ModeloPredictorEstadoPaciente:
             return None
         
         try:
-            
             datos_preparados = datos_paciente.copy()
-            for col in self.features_categoricas:
+            
+            print(f"\n📊 Predicción - Preparando datos...")
+            print(f"   Columnas de entrada: {datos_preparados.columns.tolist()}")
+            
+            #All features that the model was trained with
+            todas_las_features = self.features_numericas + self.features_categoricas
+            
+            # Add missing columns
+            for col in todas_las_features:
+                if col not in datos_preparados.columns:
+                    if col in self.features_numericas:
+                        datos_preparados[col] = 0.0
+                    else:
+                        datos_preparados[col] = 'Desconocido'
+            
+            # Remove unexpected columns
+            columnas_a_eliminar = [col for col in datos_preparados.columns if col not in todas_las_features]
+            if columnas_a_eliminar:
+                print(f"   ⚠️  Eliminando columnas no esperadas: {columnas_a_eliminar}")
+                datos_preparados = datos_preparados.drop(columns=columnas_a_eliminar)
+            
+            # Reorder columns to MATCH training order
+            # The training order is: all numeric features first, then categorical features
+            # which matches self.features_numericas + self.features_categoricas
+            datos_preparados = datos_preparados[self.features_numericas + self.features_categoricas]
+            
+            print(f"   Orden final de columnas: {datos_preparados.columns.tolist()}")
+            
+            # Convert numeric types
+            for col in self.features_numericas:
                 if col in datos_preparados.columns:
-                    datos_preparados[col] = self.encoders[col].transform(
-                        datos_preparados[col].astype(str)
-                    )
-                    
-            if self.scaler:
-                datos_preparados[self.features_numericas] = self.scaler.transform(
-                    datos_preparados[self.features_numericas]
-                )
-                
-            prediccion = self.modelo.predict(datos_preparados)[0]
-            probabilidades = self.modelo.predict_proba(datos_preparados)[0]
+                    datos_preparados[col] = pd.to_numeric(datos_preparados[col], errors='coerce')
+                    if datos_preparados[col].isna().any():
+                        datos_preparados[col] = datos_preparados[col].fillna(0)
+            
+            # Encode categorical variables
+            for col in self.features_categoricas:
+                if col in datos_preparados.columns and col in self.encoders:
+                    valor_str = str(datos_preparados[col].values[0])
+                    try:
+                        datos_preparados[col] = self.encoders[col].transform([valor_str])
+                    except (ValueError, KeyError) as e:
+                        print(f"   ⚠️  Valor desconocido para '{col}': '{valor_str}' ({e}), usando 'Desconocido'")
+                        try:
+                            datos_preparados[col] = self.encoders[col].transform(['Desconocido'])
+                        except (ValueError, KeyError):
+                            print(f"   ⚠️  Encoder para '{col}' tampoco tiene 'D esconocido', asignando 0")
+                            datos_preparados[col] = 0
+            
+            # Normalize numeric data
+            if self.scaler and self.features_numericas:
+                # Get only numeric columns as a 2D array for the scaler
+                X_numeric = datos_preparados[self.features_numericas].values
+                X_scaled = self.scaler.transform(X_numeric)
+                datos_preparados[self.features_numericas] = X_scaled
+            
+            # Convert to numpy array if needed for prediction
+            # sklearn expects (n_samples, n_features) shape
+            X_array = datos_preparados.values
+            
+            print(f"   ✅ Shape final: {X_array.shape}, dtypes: {datos_preparados.dtypes.to_dict() if hasattr(datos_preparados, 'dtypes') else 'array'}")
+            print(f"   🤖 Realizando predicción con sklearn...")
+            
+            # Perform prediction
+            prediccion = self.modelo.predict([X_array[0]])[0]
+            probabilidades = self.modelo.predict_proba([X_array[0]])[0]
             confianza = max(probabilidades)
             
             idx_prediccion = np.argmax(probabilidades)
+            clase_predicha = self.clases[idx_prediccion]
             
             resultado = {
-                'estado_predicho': self.clases[idx_prediccion],
-                'confianza': confianza,
+                'clase_predicha': str(clase_predicha),
+                'confianza': float(confianza),
                 'probabilidades': {
-                    self.clases[i]: float(probabilidades[i])
+                    str(self.clases[i]): float(probabilidades[i])
                     for i in range(len(self.clases))
                 }
             }
             
+            print(f"   ✅ Predicción: {clase_predicha} (confianza: {confianza:.2%})")
+            
             return resultado
         except Exception as e:
             print(f"❌ Error al hacer predicción: {e}")
+            import traceback
+            traceback.print_exc()
             return None
         
     def pipeline_completo(self, db_manager, guardar_modelo: bool = True) -> None:

@@ -6,7 +6,7 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #F5F7FA 0%, #E8EEF7 100%);
     min-height: 100vh;
     padding: 20px;
 }
@@ -15,13 +15,13 @@ body {
     max-width: 900px;
     margin: 0 auto;
     background: white;
-    border-radius: 10px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(22, 101, 192, 0.08);
     overflow: hidden;
 }
 
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
     color: white;
     padding: 40px 20px;
     text-align: center;
@@ -61,12 +61,12 @@ main {
 }
 
 .tab-button:hover {
-    color: #667eea;
+    color: #1565C0;
 }
 
 .tab-button.active {
-    color: #667eea;
-    border-bottom-color: #667eea;
+    color: #1565C0;
+    border-bottom-color: #1565C0;
     font-weight: bold;
 }
 
@@ -121,8 +121,8 @@ main {
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 5px rgba(102, 126, 234, 0.2);
+    border-color: #1565C0;
+    box-shadow: 0 0 5px rgba(21, 101, 192, 0.2);
 }
 
 .form-row {
@@ -144,33 +144,37 @@ main {
 }
 
 .btn-primary {
-    background: #667eea;
+    background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
     color: white;
 }
 
 .btn-primary:hover {
-    background: #5568d3;
+    background: linear-gradient(135deg, #0D47A1 0%, #082A5A 100%);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 5px 15px rgba(21, 101, 192, 0.25);
 }
 
 .btn-info {
-    background: #2196F3;
+    background: linear-gradient(135deg, #0288D1 0%, #0277BD 100%);
     color: white;
     margin-right: 10px;
 }
 
 .btn-info:hover {
-    background: #1976D2;
+    background: linear-gradient(135deg, #0277BD 0%, #1565C0 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(2, 136, 209, 0.25);
 }
 
 .btn-success {
-    background: #4CAF50;
+    background: linear-gradient(135deg, #00897B 0%, #004D40 100%);
     color: white;
 }
 
 .btn-success:hover {
-    background: #388E3C;
+    background: linear-gradient(135deg, #004D40 0%, #003728 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 137, 123, 0.25);
 }
 
 .btn:active {
@@ -195,21 +199,21 @@ main {
 }
 
 .resultado.success {
-    background: #e8f5e9;
-    border: 1px solid #4caf50;
-    color: #2e7d32;
+    background: #E0F7E6;
+    border: 1px solid #00897B;
+    color: #00695C;
 }
 
 .resultado.error {
-    background: #ffebee;
-    border: 1px solid #f44336;
-    color: #c62828;
+    background: #FFEBEE;
+    border: 1px solid #E53935;
+    color: #B71C1C;
 }
 
 .resultado.loading {
-    background: #e3f2fd;
-    border: 1px solid #2196f3;
-    color: #1565c0;
+    background: #E3F2FD;
+    border: 1px solid #1565C0;
+    color: #0D47A1;
 }
 
 .resultado h3 {

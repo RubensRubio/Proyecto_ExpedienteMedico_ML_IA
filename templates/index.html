@@ -64,16 +64,7 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Número de leucocitos al inicio *</label>
-                            <input type="number" name="Leucocitos" step="0.01" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Riesgo calculado *</label>
-                            <select name="Riesgo calculado" required>
-                                <option value="">Seleccionar</option>
-                                <option value="Riesgo alto">Riesgo alto</option>
-                                <option value="Riesgo estandar">Riesgo estandar</option>
-                            </select>
+                            <input type="number" name="Número de Leucocitos al inicio" step="0.01" required>
                         </div>
                     </div>
 
@@ -89,29 +80,20 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Número de blastos *</label>
-                            <input type="number" name="Número de blastos" step="0.01" min="0" max="1" required>
+                            <label>Número de blastos (%) *</label>
+                            <input type="number" name="Número de blastos" step="1" min="0" max="100" required placeholder="Ej: 85">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Clasificación cariotipo *</label>
-                            <select name="Clasificación cariotipo" required>
-                                <option value="">Seleccionar...</option>
-                                <option value="Normal">Normal</option>
-                                <option value="Anormal">Anormal</option>
-                                <option value="No detectado">No detectado</option>
-                            </select>
+                            <label>Clasificación cariotipo (ej: Normal, t(9;22), etc.) *</label>
+                            <input type="text" name="Clasificación cariotipo" placeholder="Ej: Normal o vacío para No detectado" required>
                         </div>
 
                         <div class="form-group">
-                            <label>Biología molecular *</label>
-                            <select name="Biología molecular" required>
-                                <option value="">Seleccionar...</option>
-                                <option value="Favorable">Favorable</option>
-                                <option value="Desfavorable">Desfavorable</option>
-                            </select>
+                            <label>Biología molecular (ej: Favorable, t(9;22), etc.)</label>
+                            <input type="text" name="Biología molecular" placeholder="Ej: Variante BCR-ABL o vacío">
                         </div>
                     </div>
 
@@ -120,26 +102,12 @@
                             <label>GATE Inmunofenotipo *</label>
                             <input type="number" name="GATE Inmunofenotipo" step="0.01" min="0" required>
                         </div>
-
-                        <div class="form-group">
-                            <label>Tipo infiltración *</label>
-                            <select name="Tipo infiltración" required>
-                                <option value="">Seleccionar...</option>
-                                <option value="Baja infiltración">Baja infiltración</option>
-                                <option value="Moderada moderada">Moderada</option>
-                                <option value="Alta infiltración">Alta infiltración</option>
-                            </select>
-                        </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Resistencia al tratamiento *</label>
-                            <select name="Resistencia al tratamiento" required>
-                                <option value="">Seleccionar...</option>
-                                <option value="false">No (false)</option>
-                                <option value="true">Sí (true)</option>
-                            </select>
+                            <label>Marcadores aberrantes (ej: Presentes, Negativos, etc.)</label>
+                            <input type="text" name="Marcadores aberrantes" placeholder="Ej: Presentes o vacío para negativos">
                         </div>
                     </div>
 
@@ -149,24 +117,6 @@
 
                 </form>
                 <div id="resultado-paciente" class="resultado"></div>
-            </div>
-
-            <hr>
-            <div class="operaciones">
-                <h2>Operaciones del modelo</h2>
-
-                <div class="botones-operaciones">
-                    <button id="btn-entrenar" class="btn btn-info">
-                        🤖 Entrenar Modelo
-                    </button>
-
-                    <button id="btn-predecir" class="btn btn-success">
-                        🎯 Realizar Predicción
-                    </button>
-                </div>
-
-                <div id="resultado-entrenamiento" class="resultado"></div>
-                <div id="resultado-prediccion" class="resultado"></div>
             </div>
 
         </main>

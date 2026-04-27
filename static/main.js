@@ -143,6 +143,11 @@ document.getElementById('form-paciente').addEventListener('submit', async functi
 
         // Convertir booleano
         datos['Resistencia al tratamiento'] = datos['Resistencia al tratamiento'] === 'true';
+        
+        // Convertir Número de blastos de porcentaje (0-100) a decimal (0-1)
+        if (datos['Número de blastos']) {
+            datos['Número de blastos'] = parseFloat(datos['Número de blastos']) / 100;
+        }
 
         // Enviar POST
         const response = await fetch(`${API_BASE}/api/paciente/nuevo`, {
@@ -156,16 +161,28 @@ document.getElementById('form-paciente').addEventListener('submit', async functi
         const data = await response.json();
 
         if (data.status === 'success') {
+            let mostrarObjeto = {
+                'Edad': datos.Edad,
+                'Sexo': datos.Sexo,
+                'Riesgo Calculado': data.riesgo_calculado || 'No disponible',
+                'Modelo Entrenado': data.modelo_entrenado ? 'Sí' : 'No'
+            };
+            
+            // Si hay predicción natural, agregarla
+            if (data.prediccion_natural) {
+                mostrarObjeto['Predicción Clínica'] = data.prediccion_natural;
+            }
+            
+            // Si hay mensaje adicional
+            if (data.mensaje) {
+                mostrarObjeto['Mensaje'] = data.mensaje;
+            }
+            
             mostrarResultadoObjeto(
                 'resultado-paciente',
                 'success',
                 '✅ Paciente guardado exitosamente',
-                {
-                    'Edad': datos.Edad,
-                    'Sexo': datos.Sexo,
-                    'Estado': 'Pendiente de predicción',
-                    'Mensaje': data.mensaje
-                }
+                mostrarObjeto
             );
             document.getElementById('form-paciente').reset();
         } else {
@@ -179,136 +196,6 @@ document.getElementById('form-paciente').addEventListener('submit', async functi
     } catch (error) {
         mostrarResultado(
             'resultado-paciente',
-            'error',
-            '❌ Error de conexión',
-            `No se puede conectar al servidor: ${error.message}`
-        );
-    }
-});
-
-// ============================================================================
-// FUNCIÓN 3: ENTRENAR MODELO
-// ============================================================================
-
-document.getElementById('btn-entrenar').addEventListener('click', async function () {
-    this.disabled = true;
-
-    mostrarResultado(
-        'resultado-entrenamiento',
-        'loading',
-        '🤖 Entrenando...',
-        'Esto puede tomar algunos minutos...'
-    );
-
-    try {
-        const response = await fetch(`${API_BASE}/api/entrenar-modelo`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const data = await response.json();
-
-        if (data.status === 'success') {
-            mostrarResultadoObjeto(
-                'resultado-entrenamiento',
-                'success',
-                '✅ Modelo entrenado exitosamente',
-                data.metricas
-            );
-        } else {
-            mostrarResultado(
-                'resultado-entrenamiento',
-                'error',
-                '❌ Error',
-                data.mensaje || 'Error desconocido'
-            );
-        }
-    } catch (error) {
-        mostrarResultado(
-            'resultado-entrenamiento',
-            'error',
-            '❌ Error de conexión',
-            `No se puede conectar al servidor: ${error.message}`
-        );
-    } finally {
-        this.disabled = false;
-    }
-});
-
-// ============================================================================
-// FUNCIÓN 4: REALIZAR PREDICCIÓN
-// ============================================================================
-
-document.getElementById('btn-predecir').addEventListener('click', async function () {
-    // Obtener datos del formulario del paciente
-    const formData = new FormData(document.getElementById('form-paciente'));
-
-    if (formData.entries().length === 0) {
-        mostrarResultado(
-            'resultado-prediccion',
-            'error',
-            '❌ Error',
-            'Por favor completa el formulario de paciente primero'
-        );
-        return;
-    }
-
-    const datos = Object.fromEntries(formData);
-    datos['Resistencia al tratamiento'] = datos['Resistencia al tratamiento'] === 'true';
-
-    mostrarResultado(
-        'resultado-prediccion',
-        'loading',
-        '🎯 Realizando predicción...',
-        'Analizando datos del paciente...'
-    );
-
-    try {
-        const response = await fetch(`${API_BASE}/api/prediccion`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(datos)
-        });
-
-        const data = await response.json();
-
-        if (data.status === 'success') {
-            // Mostrar respuesta natural
-            const elemento = document.getElementById('resultado-prediccion');
-            elemento.innerHTML = `
-        <h3 style="color: #2e7d32; margin-bottom: 15px;">✅ Resultado del Análisis</h3>
-        <div style="background: #f0f8f0; padding: 15px; border-radius: 5px; border-left: 5px solid #4caf50;">
-            <p style="white-space: pre-wrap; line-height: 1.8; color: #1b5e20;">
-                ${data.respuesta_natural}
-            </p>
-        </div>
-    `;
-            elemento.className = 'resultado show success';
-            // mostrarResultadoObjeto(
-            //     'resultado-prediccion',
-            //     'success',
-            //     `🎯 Predicción: ${data.prediccion}`,
-            //     {
-            //         'Predicción': data.prediccion,
-            //         'Confianza': data.confianza,
-            //         'Probabilidades': data.probabilidades
-            //     }
-            // );
-        } else {
-            mostrarResultado(
-                'resultado-prediccion',
-                'error',
-                '❌ Error',
-                data.mensaje || 'Error desconocido'
-            );
-        }
-    } catch (error) {
-        mostrarResultado(
-            'resultado-prediccion',
             'error',
             '❌ Error de conexión',
             `No se puede conectar al servidor: ${error.message}`
