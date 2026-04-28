@@ -1,8 +1,9 @@
 // ============================================================================
 // CONFIGURACIÓN
 // ============================================================================
-
-const API_BASE = "http://localhost:8000";
+// Usar window.location.origin para que funcione en cualquier lugar
+// (localhost:8000, Render, etc.)
+const API_BASE = window.location.origin;
 
 // ============================================================================
 // FUNCIONES AUXILIARES
