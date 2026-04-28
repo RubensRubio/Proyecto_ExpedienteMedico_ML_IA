@@ -209,11 +209,12 @@ class ModeloPredictorEstadoPaciente:
         print(f"\n🎯 Accuracy (precisión general): {accuracy:.2%}")
         
         print("\n📈 Reporte de clasificación:")
-        clases_presentes = sorted(y_test.unique().tolist())
-        print(classification_report(y_test, y_pred, target_names=clases_presentes))
+        # Usar todas las clases del modelo, no solo las presentes en y_test
+        clases_reporte = sorted(self.clases.tolist())
+        print(classification_report(y_test, y_pred, labels=clases_reporte, target_names=clases_reporte, zero_division=0))
         
         print("\n📉 Matriz de confusión:")
-        cm = confusion_matrix(y_test, y_pred)
+        cm = confusion_matrix(y_test, y_pred, labels=clases_reporte)
         print(cm)
         
         print("\n🌟 Importancia de características (Top 5):")

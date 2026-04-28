@@ -15,8 +15,20 @@ from .language_generator import generar_respuesta_natural
 from .risk_classifier import clasificar_pacientes, preparar_pacientes_para_bd, clasificar_paciente, procesar_cariotipo, procesar_biologia_molecular, procesar_gate_inmunofenotipo, clasificar_tipo_infiltracion, procesar_marcadores_aberrantes
 
 #Cargar variables de entorno
+# Intentar cargar desde .env si existe (desarrollo local)
+# Si no existe, usa las variables del sistema (producción en Render)
 env_path = Path(__file__).parent / ".env"
-load_dotenv(dotenv_path=env_path)
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    # En producción, cargar todas las variables de entorno del sistema
+    load_dotenv()
+
+# Verificar que MONGODB_URI está configurada
+mongodb_uri = os.getenv("MONGODB_URI")
+if not mongodb_uri:
+    print("⚠️  ADVERTENCIA: MONGODB_URI no está configurada")
+    print("   Variables de entorno disponibles:", list(os.environ.keys())[:5], "...")
 
 # ============================================================================
 # CONFIGURACIÓN DE FASTAPI
@@ -64,6 +76,7 @@ async def _entrenar_modelo_interno():
         if db_manager is None:
             db_manager = DatabaseManager()
             uri = os.getenv("MONGODB_URI")
+            print(f"🔍 DEBUG - URI desde entorno: {uri[:50]}..." if uri else "❌ URI no encontrada en entorno")
             if uri:
                 db_manager.uri = uri
             if not db_manager.conectar("modelo_pacientes", "coleccion1"):
@@ -216,6 +229,7 @@ async def crear_paciente(data : dict):
         if db_manager is None:
             db_manager = DatabaseManager()
             uri = os.getenv("MONGODB_URI")
+            print(f"🔍 DEBUG crear_paciente - URI: {uri[:50]}..." if uri else "❌ URI no encontrada")
                 
             if uri:
                 db_manager.uri = uri
