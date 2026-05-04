@@ -376,9 +376,36 @@ function mostrarError(mensaje) {
 // ============================================================================
 
 function agregarERM(pacienteId) {
-    console.log('📝 Agregando ERM para paciente:', pacienteId);
-    alert(`Agregar ERM para paciente: ${pacienteId}`);
-    // TODO: Implementar la lógica para agregar ERM
+    console.log('📝 Abriendo modal ERM para paciente:', pacienteId);
+    abrirModalERM(pacienteId);
+}
+
+function abrirModalERM(pacienteId) {
+    const modal = document.getElementById('modal-erm');
+    modal.style.display = 'flex';
+    modal.pacienteId = pacienteId;  // Guardar el ID para uso posterior
+    
+    // Limpiar mensajes previos
+    const messagesDiv = document.getElementById('erm-chat-messages');
+    messagesDiv.innerHTML = `
+        <div class="chat-message assistant">
+            <div class="message-content">
+                👋 Hola, voy a ayudarte a registrar el ERM (Expediente Resultado Médico) para el paciente ${pacienteId.substring(0, 12)}...
+            </div>
+        </div>
+    `;
+    
+    // Enfocar el input
+    document.getElementById('erm-chat-input').focus();
+    
+    console.log('✅ Modal ERM abierto para paciente:', pacienteId);
+}
+
+function cerrarModalERM() {
+    const modal = document.getElementById('modal-erm');
+    modal.style.display = 'none';
+    document.getElementById('erm-chat-input').value = '';
+    console.log('✅ Modal ERM cerrado');
 }
 
 // ============================================================================
@@ -591,6 +618,12 @@ async function finalizeChat() {
         if (data.status === 'success') {
             addMessage('assistant', '🎉 ¡Paciente guardado exitosamente! El paciente ha sido registrado en el sistema.');
             
+            // Mostrar el ID del paciente para seguimiento
+            if (data.paciente_id) {
+                const idMsg = `📋 **ID del Paciente para seguimiento:** ${data.paciente_id}\n\nUsa este ID para buscar y dar seguimiento al paciente en la sección "Pacientes Registrados"`;
+                addMessage('system', idMsg);
+            }
+            
             // Mostrar la respuesta natural de la predicción en el chat
             if (data.prediccion_natural) {
                 addMessage('assistant', `📊 Resultado del análisis:\n\n${data.prediccion_natural}`);
@@ -680,6 +713,52 @@ document.getElementById('chat-cancel-btn').addEventListener('click', function() 
 // ============================================================================
 // INICIALIZACIÓN
 // ============================================================================
+
+// Event listeners para modal ERM
+document.getElementById('erm-chat-send-btn').addEventListener('click', function() {
+    const input = document.getElementById('erm-chat-input');
+    const userInput = input.value.trim();
+    
+    if (!userInput) {
+        input.focus();
+        return;
+    }
+    
+    // Por ahora, solo mostrar el mensaje de forma visual
+    const messagesDiv = document.getElementById('erm-chat-messages');
+    
+    // Agregar mensaje del usuario
+    const userMsgDiv = document.createElement('div');
+    userMsgDiv.className = 'chat-message user';
+    userMsgDiv.innerHTML = `<div class="message-content">${escapeHtml(userInput)}</div>`;
+    messagesDiv.appendChild(userMsgDiv);
+    
+    // Limpiar input
+    input.value = '';
+    
+    // Auto-scroll
+    const container = document.getElementById('erm-chat-container');
+    setTimeout(() => {
+        container.scrollTop = container.scrollHeight;
+    }, 100);
+    
+    input.focus();
+});
+
+// Enviar con Enter en modal ERM
+document.getElementById('erm-chat-input').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('erm-chat-send-btn').click();
+    }
+});
+
+// Cerrar modal al hacer click fuera
+document.getElementById('modal-erm').addEventListener('click', function(e) {
+    if (e.target === this) {
+        cerrarModalERM();
+    }
+});
 
 console.log('✅ Interfaz web cargada correctamente');
 

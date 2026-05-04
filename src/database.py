@@ -48,19 +48,20 @@ class DatabaseManager:
             self.connected = False
             print("Desconectado de MongoDB.")
              
-    def guardar_paciente(self, paciente : Dict) -> bool:
+    def guardar_paciente(self, paciente : Dict):
         
         if not self.connected:
             print("No hay conexión a la base de datos.")
-            return False
+            return None
         
         try:
             paciente['fecha_registro'] = datetime.now()
             resultado = self.collection.insert_one(paciente)
-            return True
+            # Devolver el ID del documento insertado en lugar de solo True
+            return resultado.inserted_id
         except PyMongoError as e:
             print(f"Error al guardar paciente: {e}")
-            return False
+            return None
         
     def guardar_pacientes_batch(self, pacientes:List[Dict]) -> int:
         

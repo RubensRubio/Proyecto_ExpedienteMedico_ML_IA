@@ -330,6 +330,8 @@ async def crear_paciente(data : dict):
                 content={"status": "error", "message": "Error al guardar el paciente"}
             )
         
+        print(f"✅ Paciente guardado con ID: {paciente_guardado}")
+        
         # Entrenar el modelo automáticamente con los nuevos datos
         print("\n" + "="*60)
         modelo_entrenado = await _entrenar_modelo_interno()
@@ -400,6 +402,7 @@ async def crear_paciente(data : dict):
             content={
                 "status": "success", 
                 "mensaje": "Paciente guardado, modelo entrenado y predicción generada",
+                "paciente_id": str(paciente_guardado),
                 "riesgo_calculado": data.get('Riesgo calculado'),
                 "modelo_entrenado": modelo_entrenado,
                 "prediccion_natural": respuesta_natural

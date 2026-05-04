@@ -417,4 +417,68 @@ footer {
 .btn-secondary:hover {
     background-color: #5a6268;
 }
+
+/* MODAL ERM */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(22, 101, 192, 0.2);
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    background-color: #f8f9fa;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #1565C0;
+    font-size: 1.5em;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.3s;
+}
+
+.modal-close:hover {
+    background-color: #e0e0e0;
+    color: #333;
+}
 }

@@ -214,6 +214,61 @@
                 </p>
             </div>
 
+            <!-- MODAL ERM CHAT -->
+            <div id="modal-erm" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>📝 Agregar ERM - Expediente Resultado Médico</h2>
+                        <button class="modal-close" onclick="cerrarModalERM()">&times;</button>
+                    </div>
+                    
+                    <div id="erm-chat-container" style="
+                        border: 2px solid #3498db;
+                        border-radius: 8px;
+                        height: 400px;
+                        overflow-y: auto;
+                        padding: 20px;
+                        background-color: #f8f9fa;
+                        margin-bottom: 15px;
+                    ">
+                        <div id="erm-chat-messages">
+                            <div class="chat-message assistant">
+                                <div class="message-content">
+                                    👋 Hola, voy a ayudarte a registrar el ERM (Expediente Resultado Médico) para este paciente. Proporcionaré una interfaz amigable para capturar toda la información necesaria.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <input 
+                            type="text" 
+                            id="erm-chat-input" 
+                            placeholder="Escribe aquí..." 
+                            style="
+                                flex: 1;
+                                padding: 12px;
+                                border: 1px solid #ddd;
+                                border-radius: 4px;
+                                font-size: 1em;
+                            ">
+                        <button 
+                            id="erm-chat-send-btn" 
+                            class="btn btn-primary"
+                            style="width: 100px;">
+                            Enviar
+                        </button>
+                    </div>
+                    
+                    <button 
+                        class="btn btn-secondary"
+                        onclick="cerrarModalERM()"
+                        style="margin-top: 10px; background-color: #e74c3c; width: 100%;">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+
         </main>
 
         <footer>
