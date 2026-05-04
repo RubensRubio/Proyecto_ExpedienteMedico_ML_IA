@@ -307,6 +307,16 @@ async def crear_paciente(data : dict):
         
         print(f"\nDatos finales para guardar: {data}\n")
         
+        # Procesar campos opcionales que vienen del chat
+        # Convertir "No tengo" y "No aplica" a cadenas vacías
+        optional_fields = ['Clasificación cariotipo', 'Biología molecular', 'Marcadores aberrantes']
+        for field in optional_fields:
+            if field in data:
+                value_str = str(data[field]).lower().strip()
+                if 'no tengo' in value_str or 'no aplica' in value_str:
+                    data[field] = ''
+                    print(f"✅ Campo '{field}' convertido a vacío (era '{data[field]}')")
+        
         # Asegurar que tiene "Estado del paciente" con valor por defecto
         if "Estado del paciente" not in data or data["Estado del paciente"] is None:
             data["Estado del paciente"] = "Tratamiento"  # Valor por defecto
@@ -524,5 +534,103 @@ async def obtener_pacientes(filtro: str = ""):
         return JSONResponse(
             status_code=500,
             content={"status": "error", "message": f"Error al obtener pacientes: {str(e)}"}
+        )
+
+
+# ============================================================================
+# ENDPOINT: CHAT - EXTRAER ENTIDADES
+# ============================================================================
+
+@app.post("/api/chat/extract")
+async def extract_from_natural_language(data: dict):
+    """Extrae valores de lenguaje natural para los campos del paciente"""
+    
+    try:
+        field_name = data.get("field_name", "")
+        field_type = data.get("field_type", "")
+        user_input = data.get("user_input", "").strip().lower()
+        
+        print(f"🔍 Extrayendo para campo: {field_name} (tipo: {field_type})")
+        print(f"   Input: {user_input}")
+        
+        extracted_value = None
+        
+        # ===== TIPO: NUMBER =====
+        if field_type == "number":
+            # Extraer primer número del input
+            import re
+            numbers = re.findall(r'\d+\.?\d*', user_input)
+            if numbers:
+                extracted_value = float(numbers[0])
+                print(f"   ✅ Número extraído: {extracted_value}")
+        
+        # ===== TIPO: OPTION =====
+        elif field_type == "option":
+            if field_name == "Sexo":
+                if 'masculino' in user_input or user_input.startswith('m'):
+                    extracted_value = "M"
+                elif 'femenino' in user_input or user_input.startswith('f'):
+                    extracted_value = "F"
+                print(f"   ✅ Sexo extraído: {extracted_value}")
+            
+            elif field_name == "Tipo leucemia":
+                if 'b' in user_input:
+                    extracted_value = "B"
+                elif 't' in user_input:
+                    extracted_value = "T"
+                elif 'm' in user_input:
+                    extracted_value = "M"
+                print(f"   ✅ Leucemia extraída: {extracted_value}")
+        
+        # ===== TIPO: TEXT =====
+        elif field_type == "text":
+            # Para texto, aceptar como está (con límite de caracteres)
+            if len(user_input) <= 100:
+                extracted_value = user_input.capitalize()
+            else:
+                extracted_value = user_input[:100].capitalize()
+            print(f"   ✅ Texto extraído: {extracted_value}")
+        
+        # ===== TIPO: OPTIONAL (campos opcionales del chat) =====
+        elif field_type == "optional":
+            # Detectar si el usuario dice "no tengo" o "no aplica"
+            if 'no tengo' in user_input or 'no aplica' in user_input:
+                extracted_value = "No tengo" if 'no tengo' in user_input else "No aplica"
+                print(f"   ✅ Campo opcional extraído: {extracted_value}")
+            else:
+                # Aceptar el texto como está
+                if len(user_input) <= 100 and user_input:
+                    extracted_value = user_input.capitalize()
+                    print(f"   ✅ Campo opcional extraído: {extracted_value}")
+                else:
+                    print(f"   ⚠️  Campo vacío para campo opcional")
+                    extracted_value = None
+        
+        if extracted_value is not None:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": "success",
+                    "extracted_value": extracted_value,
+                    "field_name": field_name
+                }
+            )
+        else:
+            return JSONResponse(
+                status_code=400,
+                content={
+                    "status": "error",
+                    "message": f"No se pudo extraer valor para {field_name}",
+                    "extracted_value": None
+                }
+            )
+    
+    except Exception as e:
+        print(f"❌ Error extrayendo valor: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Error extrayendo valor: {str(e)}", "extracted_value": None}
         )
         
