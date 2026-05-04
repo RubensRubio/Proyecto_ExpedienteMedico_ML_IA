@@ -358,6 +358,15 @@ class ModeloPredictorEstadoPaciente:
             
             print(f"   ✅ Shape final: {X_array.shape}, dtypes: {datos_preparados.dtypes.to_dict() if hasattr(datos_preparados, 'dtypes') else 'array'}")
             print(f"   🤖 Realizando predicción con sklearn...")
+            print(f"   📋 Clases conocidas: {self.clases}")
+            
+            # Perform prediction
+            prediccion = self.modelo.predict([X_array[0]])[0]
+            probabilidades = self.modelo.predict_proba([X_array[0]])[0]
+            confianza = max(probabilidades)
+            
+            print(f"   📊 Probabilidades shape: {probabilidades.shape}, valores: {probabilidades}")
+            print(f"   📋 Clases del modelo: {self.clases} (length: {len(self.clases)})")
             
             # Perform prediction
             prediccion = self.modelo.predict([X_array[0]])[0]
@@ -367,12 +376,16 @@ class ModeloPredictorEstadoPaciente:
             idx_prediccion = np.argmax(probabilidades)
             clase_predicha = self.clases[idx_prediccion]
             
+            # ⚠️ FIX: Usar len(probabilidades) en lugar de len(self.clases)
+            # porque el array de probabilidades puede tener un tamaño diferente
+            num_clases = len(probabilidades)
+            
             resultado = {
                 'clase_predicha': str(clase_predicha),
                 'confianza': float(confianza),
                 'probabilidades': {
                     str(self.clases[i]): float(probabilidades[i])
-                    for i in range(len(self.clases))
+                    for i in range(num_clases) if i < len(self.clases)
                 }
             }
             
