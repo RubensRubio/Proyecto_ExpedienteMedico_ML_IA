@@ -307,6 +307,11 @@ async def crear_paciente(data : dict):
         
         print(f"\nDatos finales para guardar: {data}\n")
         
+        # Asegurar que tiene "Estado del paciente" con valor por defecto
+        if "Estado del paciente" not in data or data["Estado del paciente"] is None:
+            data["Estado del paciente"] = "Tratamiento"  # Valor por defecto
+            print(f"✅ Estado del paciente establecido a 'Tratamiento'")
+        
         paciente_guardado = db_manager.guardar_paciente(data)
         
         if not paciente_guardado:
@@ -450,5 +455,74 @@ async def realizar_prediccion(data : dict):
         return JSONResponse(
             status_code=500,
             content={"status": "error", "message": f"Error al realizar la predicción: {str(e)}"}
+        )
+
+# ============================================================================
+# ENDPOINT 5: OBTENER LISTA DE PACIENTES
+# ============================================================================
+
+@app.get("/api/pacientes")
+async def obtener_pacientes(filtro: str = ""):
+    """Obtener lista de todos los pacientes registrados con filtro opcional"""
+    
+    global db_manager
+    
+    try:
+        if db_manager is None:
+            db_manager = DatabaseManager()
+            uri = os.getenv("MONGODB_URI")
+            
+            if uri:
+                db_manager.uri = uri
+                
+            if not db_manager.conectar("modelo_pacientes", "coleccion1"):
+                return JSONResponse(
+                    status_code=500,
+                    content={"status": "error", "message": "Error al conectar a la base de datos"}
+                )
+        
+        # Crear filtro de búsqueda si existe
+        query = {}
+        if filtro.strip():
+            # Buscar en el ID (ObjectId convertido a string)
+            from bson import ObjectId
+            try:
+                query["_id"] = ObjectId(filtro.strip())
+            except:
+                # Si no es un ObjectId válido, buscar en string
+                query["_id"] = ObjectId.from_string(filtro.strip()) if len(filtro.strip()) == 24 else None
+        
+        # Obtener todos los documentos ordenados por fecha descendente
+        if query and query.get("_id"):
+            pacientes_cursor = db_manager.collection.find({"_id": query["_id"]}).sort("fecha_registro", -1)
+        else:
+            pacientes_cursor = db_manager.collection.find().sort("fecha_registro", -1)
+        
+        pacientes = []
+        for paciente in pacientes_cursor:
+            pacientes.append({
+                "id": str(paciente.get("_id", "")),
+                "estado": paciente.get("Estado del paciente", "Desconocido"),
+                "fecha_registro": paciente.get("fecha_registro").isoformat() if paciente.get("fecha_registro") else ""
+            })
+        
+        print(f"✅ Pacientes encontrados: {len(pacientes)}")
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "success",
+                "total": len(pacientes),
+                "pacientes": pacientes
+            }
+        )
+        
+    except Exception as e:
+        print(f"❌ Error al obtener pacientes: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Error al obtener pacientes: {str(e)}"}
         )
         
