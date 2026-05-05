@@ -300,6 +300,33 @@ class ModeloPredictorEstadoPaciente:
             print(f"\n📊 Predicción - Preparando datos...")
             print(f"   Columnas de entrada: {datos_preparados.columns.tolist()}")
             
+            # ========== CRITERIO CLÍNICO: BLASTOS >= 20% ==========
+            # Si el número de blastos es >= 20%, es diagnóstico de leucemia
+            # y requiere tratamiento obligatorio
+            num_blastos = None
+            if 'Número de blastos' in datos_paciente.columns:
+                num_blastos = float(datos_paciente['Número de blastos'].values[0])
+                print(f"   🔬 Número de blastos: {num_blastos:.2%} (valor: {num_blastos})")
+                
+                if num_blastos >= 0.20:  # 20% o más
+                    print(f"   ⚠️  CRITERIO CLÍNICO ACTIVADO: Blastos >= 20%")
+                    print(f"   🏥 DIAGNÓSTICO AUTOMÁTICO: TRATAMIENTO OBLIGATORIO")
+                    print(f"   💊 Razón: Alto porcentaje de blastos indica leucemia confirmada")
+                    
+                    resultado = {
+                        'clase_predicha': 'Tratamiento',
+                        'confianza': 1.0,  # 100% de confianza
+                        'probabilidades': {
+                            'Tratamiento': 1.0,
+                            'Defunción': 0.0,
+                            'Cuidados paliativos': 0.0
+                        },
+                        'criterio_clinico': True,
+                        'razon': 'Número de blastos >= 20% indica leucemia confirmada. Tratamiento obligatorio.'
+                    }
+                    
+                    return resultado
+            
             #All features that the model was trained with
             todas_las_features = self.features_numericas + self.features_categoricas
             
@@ -342,7 +369,7 @@ class ModeloPredictorEstadoPaciente:
                         try:
                             datos_preparados[col] = self.encoders[col].transform(['Desconocido'])
                         except (ValueError, KeyError):
-                            print(f"   ⚠️  Encoder para '{col}' tampoco tiene 'D esconocido', asignando 0")
+                            print(f"   ⚠️  Encoder para '{col}' tampoco tiene 'Desconocido', asignando 0")
                             datos_preparados[col] = 0
             
             # Normalize numeric data
@@ -357,7 +384,7 @@ class ModeloPredictorEstadoPaciente:
             X_array = datos_preparados.values
             
             print(f"   ✅ Shape final: {X_array.shape}, dtypes: {datos_preparados.dtypes.to_dict() if hasattr(datos_preparados, 'dtypes') else 'array'}")
-            print(f"   🤖 Realizando predicción con sklearn...")
+            print(f"   🤖 Realizando predicción con sklearn (predicción del modelo)...")
             print(f"   📋 Clases conocidas: {self.clases}")
             
             # Perform prediction
@@ -368,11 +395,7 @@ class ModeloPredictorEstadoPaciente:
             print(f"   📊 Probabilidades shape: {probabilidades.shape}, valores: {probabilidades}")
             print(f"   📋 Clases del modelo: {self.clases} (length: {len(self.clases)})")
             
-            # Perform prediction
-            prediccion = self.modelo.predict([X_array[0]])[0]
-            probabilidades = self.modelo.predict_proba([X_array[0]])[0]
-            confianza = max(probabilidades)
-            
+            # Find prediction index
             idx_prediccion = np.argmax(probabilidades)
             clase_predicha = self.clases[idx_prediccion]
             
@@ -386,10 +409,11 @@ class ModeloPredictorEstadoPaciente:
                 'probabilidades': {
                     str(self.clases[i]): float(probabilidades[i])
                     for i in range(num_clases) if i < len(self.clases)
-                }
+                },
+                'criterio_clinico': False
             }
             
-            print(f"   ✅ Predicción: {clase_predicha} (confianza: {confianza:.2%})")
+            print(f"   ✅ Predicción del modelo: {clase_predicha} (confianza: {confianza:.2%})")
             
             return resultado
         except Exception as e:

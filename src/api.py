@@ -376,6 +376,8 @@ async def crear_paciente(data : dict):
                     confianza = float(prediccion.get('confianza', 0))
                     clase_predicha = prediccion.get('clase_predicha')
                     probabilidades = prediccion.get('probabilidades', {})
+                    criterio_clinico = prediccion.get('criterio_clinico', False)
+                    razon_clinica = prediccion.get('razon', '')
                     
                     # Generar respuesta en lenguaje natural
                     respuesta_natural = generar_respuesta_natural(
@@ -385,7 +387,13 @@ async def crear_paciente(data : dict):
                         datos_renombrados
                     )
                     
+                    # Si se activó criterio clínico, agregar nota a la respuesta
+                    if criterio_clinico and razon_clinica:
+                        respuesta_natural = f"🏥 **CRITERIO CLÍNICO:** {razon_clinica}\n\n{respuesta_natural}"
+                    
                     print(f"Predicción generada: {clase_predicha} (confianza: {confianza:.2%})")
+                    if criterio_clinico:
+                        print(f"   → Activado por criterio clínico: {razon_clinica}")
                 else:
                     print("Advertencia: prediccion retornó None")
                 
