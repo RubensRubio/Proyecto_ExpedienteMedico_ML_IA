@@ -481,4 +481,43 @@ footer {
     background-color: #e0e0e0;
     color: #333;
 }
+
+/* ESTILOS: PAGINACIÓN */
+/* ========================================================================== */
+
+.pagination-info {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.page-button {
+    padding: 8px 12px;
+    border: 1px solid #1565C0;
+    background: white;
+    color: #1565C0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    min-width: 36px;
+    text-align: center;
+}
+
+.page-button:hover {
+    background: #1565C0;
+    color: white;
+}
+
+.page-button.active {
+    background: #1565C0;
+    color: white;
+    box-shadow: 0 2px 8px rgba(21, 101, 192, 0.3);
+}
+
+.page-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
 }

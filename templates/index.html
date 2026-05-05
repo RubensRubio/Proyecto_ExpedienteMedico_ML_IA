@@ -190,31 +190,97 @@
                     >
                 </div>
                 
-                <div id="tabla-pacientes-container" style="overflow-x: auto; margin-right: -20px; margin-left: -20px; padding: 0 20px;">
-                    <table id="tabla-pacientes" class="tabla-pacientes" style="min-width: 1200px;">
+                <div id="tabla-pacientes-container" style="width: 100%; overflow: visible;">
+                    <table id="tabla-pacientes" class="tabla-pacientes" style="width: 100%; border-collapse: collapse;">
                         <thead>
                             <tr>
-                                <th>ID del Paciente</th>
-                                <th>Tipo Leucemia</th>
-                                <th>Estado</th>
-                                <th>Estatus Tratamiento</th>
-                                <th>Fecha Tratamiento</th>
-                                <th>Fecha de Registro</th>
-                                <th>Acción</th>
+                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">ID Paciente</th>
+                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">Leucemia</th>
+                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">Estado</th>
+                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">Est. Trat.</th>
+                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">Fecha Trat.</th>
+                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">Reg.</th>
+                                <th style="padding: 12px 8px; text-align: center; font-size: 0.95em;">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-pacientes-body">
                             <tr>
-                                <td colspan="7" style="text-align: center; color: #999;">
+                                <td colspan="7" style="text-align: center; color: #999; padding: 20px;">
                                     Cargando pacientes...
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <p id="contador-pacientes" style="margin-top: 15px; color: #666;">
-                    Total: 0 pacientes
-                </p>
+
+                <!-- PAGINACIÓN -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; gap: 20px;">
+                    <p class="pagination-info" style="color: #666; margin: 0;">
+                        Mostrando 0 a 0 de 0 pacientes
+                    </p>
+                    
+                    <div style="display: flex; gap: 5px; align-items: center;">
+                        <button 
+                            id="btn-pag-anterior" 
+                            onclick="cambiarPagina(-1)"
+                            style="
+                                padding: 8px 12px;
+                                background-color: #3498db;
+                                color: white;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-weight: 600;
+                            "
+                            onmouseover="this.style.backgroundColor='#2980b9'"
+                            onmouseout="this.style.backgroundColor='#3498db'"
+                        >
+                            ← Anterior
+                        </button>
+                        
+                        <div id="paginacion-numeros" style="display: flex; gap: 3px;">
+                            <!-- Se generará dinámicamente -->
+                        </div>
+                        
+                        <button 
+                            id="btn-pag-siguiente" 
+                            onclick="cambiarPagina(1)"
+                            style="
+                                padding: 8px 12px;
+                                background-color: #3498db;
+                                color: white;
+                                border: none;
+                                border-radius: 4px;
+                                cursor: pointer;
+                                font-weight: 600;
+                            "
+                            onmouseover="this.style.backgroundColor='#2980b9'"
+                            onmouseout="this.style.backgroundColor='#3498db'"
+                        >
+                            Siguiente →
+                        </button>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <label for="registros-por-pagina" style="color: #666; font-weight: 600;">Registros por página:</label>
+                        <select 
+                            id="registros-por-pagina"
+                            onchange="cambiarRegistrosPorPagina()"
+                            style="
+                                padding: 6px 8px;
+                                border: 1px solid #ddd;
+                                border-radius: 4px;
+                                font-size: 0.95em;
+                                cursor: pointer;
+                            "
+                        >
+                            <option value="10">10</option>
+                            <option value="25" selected>25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <!-- MODAL TRATAMIENTO CON CHAT -->

@@ -81,17 +81,19 @@ document.getElementById('filtro-pacientes').addEventListener('input', function(e
     const filtro = e.target.value.trim();
     console.log('🔎 Aplicando filtro:', filtro || 'vacío - mostrando todos');
     
-    if (filtro === '') {
-        // Si está vacío, mostrar todos los pacientes en memoria
-        mostrarPacientes(pacientesEnMemoria);
-    } else {
+    let resultado = pacientesEnMemoria;
+    
+    if (filtro !== '') {
         // Filtrar en memoria
-        const resultado = pacientesEnMemoria.filter(p => 
+        resultado = pacientesEnMemoria.filter(p => 
             p.id.includes(filtro)
         );
-        mostrarPacientes(resultado);
     }
+    
+    // Actualizar paginación con resultados filtrados
+    actualizarPaginacion(resultado);
 });
+
 
 // ============================================================================
 // FUNCIÓN 1: CARGAR ARCHIVO
@@ -248,6 +250,9 @@ document.getElementById('form-paciente').addEventListener('submit', async functi
 // ============================================================================
 
 let pacientesEnMemoria = []; // Guardar todos los pacientes para filtrado local
+let paginaActual = 1;
+let registrosPorPagina = 25;
+let pacientesFiltrados = [];
 
 async function cargarPacientes(filtro = "") {
     console.log('🔄 Iniciando carga de pacientes...');
@@ -269,7 +274,8 @@ async function cargarPacientes(filtro = "") {
 
         if (data.status === 'success') {
             pacientesEnMemoria = data.pacientes; // Guardar en memoria
-            mostrarPacientes(data.pacientes);
+            paginaActual = 1; // Reset a primera página
+            actualizarPaginacion(data.pacientes);
         } else {
             console.error('❌ Error en respuesta API:', data);
             mostrarError('Error en respuesta del servidor');
@@ -282,7 +288,7 @@ async function cargarPacientes(filtro = "") {
 
 function mostrarPacientes(pacientes) {
     const tbody = document.getElementById('tabla-pacientes-body');
-    const contador = document.getElementById('contador-pacientes');
+    const contador = document.querySelector('.pagination-info');
     
     console.log('👥 Total pacientes a mostrar:', pacientes.length);
     
@@ -414,6 +420,134 @@ function mostrarError(mensaje) {
             </td>
         </tr>
     `;
+}
+
+// FUNCIONES: PAGINACIÓN
+// ============================================================================
+
+function actualizarPaginacion(pacientes) {
+    pacientesFiltrados = pacientes;
+    paginaActual = 1;
+    
+    const totalPaginas = Math.ceil(pacientes.length / registrosPorPagina);
+    
+    mostrarPagina(1);
+    generarBotonesPagina(totalPaginas);
+    
+    // Actualizar contador
+    const inicio = (paginaActual - 1) * registrosPorPagina + 1;
+    const fin = Math.min(paginaActual * registrosPorPagina, pacientes.length);
+    const contador = document.querySelector('.pagination-info');
+    if (contador) {
+        contador.textContent = `Mostrando ${inicio} a ${fin} de ${pacientes.length} pacientes`;
+    }
+}
+
+function mostrarPagina(numero) {
+    const totalPaginas = Math.ceil(pacientesFiltrados.length / registrosPorPagina);
+    
+    if (numero < 1 || numero > totalPaginas) return;
+    
+    paginaActual = numero;
+    
+    const inicio = (numero - 1) * registrosPorPagina;
+    const fin = inicio + registrosPorPagina;
+    const pacientesPagina = pacientesFiltrados.slice(inicio, fin);
+    
+    mostrarPacientes(pacientesPagina);
+    
+    // Actualizar contador
+    const inicio2 = inicio + 1;
+    const fin2 = Math.min(numero * registrosPorPagina, pacientesFiltrados.length);
+    const contador = document.querySelector('.pagination-info');
+    if (contador) {
+        contador.textContent = `Mostrando ${inicio2} a ${fin2} de ${pacientesFiltrados.length} pacientes`;
+    }
+    
+    // Deshabilitar botones según corresponda
+    const btnAnterior = document.querySelector('button[onclick="cambiarPagina(-1)"]');
+    const btnSiguiente = document.querySelector('button[onclick="cambiarPagina(1)"]');
+    
+    if (btnAnterior) btnAnterior.disabled = numero === 1;
+    if (btnSiguiente) btnSiguiente.disabled = numero === totalPaginas;
+    
+    // Resaltar página actual
+    document.querySelectorAll('.page-button').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.textContent) === numero) {
+            btn.classList.add('active');
+        }
+    });
+}
+
+function cambiarPagina(direccion) {
+    const nuevaPagina = paginaActual + direccion;
+    const totalPaginas = Math.ceil(pacientesFiltrados.length / registrosPorPagina);
+    
+    if (nuevaPagina >= 1 && nuevaPagina <= totalPaginas) {
+        mostrarPagina(nuevaPagina);
+    }
+}
+
+function cambiarRegistrosPorPagina() {
+    const selectElement = document.getElementById('registros-por-pagina');
+    registrosPorPagina = parseInt(selectElement.value);
+    actualizarPaginacion(pacientesFiltrados);
+}
+
+function generarBotonesPagina(totalPaginas) {
+    const container = document.getElementById('paginacion-numeros');
+    container.innerHTML = '';
+    
+    // Mostrar un máximo de 5 botones de página
+    let inicio = Math.max(1, paginaActual - 2);
+    let fin = Math.min(totalPaginas, paginaActual + 2);
+    
+    if (totalPaginas <= 5) {
+        inicio = 1;
+        fin = totalPaginas;
+    }
+    
+    // Botón "Primera" si no estamos al inicio
+    if (inicio > 1) {
+        const btnPrimera = document.createElement('button');
+        btnPrimera.className = 'page-button';
+        btnPrimera.textContent = '1';
+        btnPrimera.onclick = () => mostrarPagina(1);
+        container.appendChild(btnPrimera);
+        
+        if (inicio > 2) {
+            const puntos = document.createElement('span');
+            puntos.textContent = '...';
+            puntos.style.padding = '5px';
+            container.appendChild(puntos);
+        }
+    }
+    
+    // Botones de página
+    for (let i = inicio; i <= fin; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'page-button' + (i === paginaActual ? ' active' : '');
+        btn.textContent = i;
+        btn.onclick = () => mostrarPagina(i);
+        container.appendChild(btn);
+    }
+    
+    // Botón "Última" si no estamos al final
+    if (fin < totalPaginas) {
+        if (fin < totalPaginas - 1) {
+            const puntos = document.createElement('span');
+            puntos.textContent = '...';
+            puntos.style.padding = '5px';
+            container.appendChild(puntos);
+        }
+        
+        const btnUltima = document.createElement('button');
+        btnUltima.className = 'page-button';
+        btnUltima.textContent = totalPaginas;
+        btnUltima.onclick = () => mostrarPagina(totalPaginas);
+        container.appendChild(btnUltima);
+    }
 }
 
 // FUNCIÓN: AGREGAR TRATAMIENTO
@@ -913,7 +1047,9 @@ document.getElementById('chat-cancel-btn').addEventListener('click', function() 
 // INICIALIZACIÓN
 // ============================================================================
 
-// Event listeners para modal ERM
+// Event listeners para modal ERM (En desarrollo)
+// TODO: Implementar funcionalidad ERM cuando esté lista
+/*
 document.getElementById('erm-chat-send-btn').addEventListener('click', function() {
     const input = document.getElementById('erm-chat-input');
     const userInput = input.value.trim();
@@ -958,8 +1094,9 @@ document.getElementById('modal-erm').addEventListener('click', function(e) {
         cerrarModalERM();
     }
 });
+*/
 
 console.log('✅ Interfaz web cargada correctamente');
 
 // Cargar pacientes al abrir la aplicación
-document.addEventListener('DOMContentLoaded', cargarPacientes);
+document.addEventListener('DOMContentLoaded', () => cargarPacientes());
