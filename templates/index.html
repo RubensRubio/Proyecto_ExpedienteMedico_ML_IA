@@ -195,6 +195,7 @@
                         <thead>
                             <tr>
                                 <th>ID del Paciente</th>
+                                <th>Tipo Leucemia</th>
                                 <th>Estado</th>
                                 <th>Fecha de Registro</th>
                                 <th>Acción</th>
@@ -202,7 +203,7 @@
                         </thead>
                         <tbody id="tabla-pacientes-body">
                             <tr>
-                                <td colspan="4" style="text-align: center; color: #999;">
+                                <td colspan="5" style="text-align: center; color: #999;">
                                     Cargando pacientes...
                                 </td>
                             </tr>
@@ -214,15 +215,15 @@
                 </p>
             </div>
 
-            <!-- MODAL ERM CHAT -->
-            <div id="modal-erm" class="modal" style="display: none;">
+            <!-- MODAL TRATAMIENTO -->
+            <div id="modal-tratamiento" class="modal" style="display: none;">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2>📝 Agregar ERM - Expediente Resultado Médico</h2>
-                        <button class="modal-close" onclick="cerrarModalERM()">&times;</button>
+                        <h2>💊 Agregar Plan de Tratamiento</h2>
+                        <button class="modal-close" onclick="cerrarModalTratamiento()">&times;</button>
                     </div>
                     
-                    <div id="erm-chat-container" style="
+                    <div id="tratamiento-chat-container" style="
                         border: 2px solid #3498db;
                         border-radius: 8px;
                         height: 400px;
@@ -231,38 +232,71 @@
                         background-color: #f8f9fa;
                         margin-bottom: 15px;
                     ">
-                        <div id="erm-chat-messages">
+                        <div id="tratamiento-chat-messages">
                             <div class="chat-message assistant">
                                 <div class="message-content">
-                                    👋 Hola, voy a ayudarte a registrar el ERM (Expediente Resultado Médico) para este paciente. Proporcionaré una interfaz amigable para capturar toda la información necesaria.
+                                    👋 Hola, voy a ayudarte a registrar el plan de tratamiento para este paciente. Necesito que respondas 2 preguntas importantes.
                                 </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: 10px;">
-                        <input 
-                            type="text" 
-                            id="erm-chat-input" 
-                            placeholder="Escribe aquí..." 
-                            style="
-                                flex: 1;
-                                padding: 12px;
-                                border: 1px solid #ddd;
-                                border-radius: 4px;
-                                font-size: 1em;
-                            ">
+                    <div style="display: flex; flex-direction: column; gap: 15px;">
+                        <!-- Pregunta 1: Protocolo -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">
+                                1️⃣ ¿Cuál es el protocolo de tratamiento?
+                            </label>
+                            <select 
+                                id="protocolo-select"
+                                style="
+                                    width: 100%;
+                                    padding: 10px;
+                                    border: 1px solid #ddd;
+                                    border-radius: 4px;
+                                    font-size: 1em;
+                                    background-color: white;
+                                ">
+                                <option value="">-- Selecciona un protocolo --</option>
+                                <option value="Protocolo XV">Protocolo XV</option>
+                                <option value="Protocolo New York">Protocolo New York</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Pregunta 2: Fase -->
+                        <div>
+                            <label style="display: block; margin-bottom: 8px; font-weight: 600;">
+                                2️⃣ ¿Cuál es la fase del tratamiento?
+                            </label>
+                            <select 
+                                id="fase-select"
+                                style="
+                                    width: 100%;
+                                    padding: 10px;
+                                    border: 1px solid #ddd;
+                                    border-radius: 4px;
+                                    font-size: 1em;
+                                    background-color: white;
+                                ">
+                                <option value="">-- Selecciona una fase --</option>
+                                <option value="Inducción">Inducción</option>
+                                <option value="Consolidación">Consolidación</option>
+                                <option value="Mantenimiento">Mantenimiento</option>
+                            </select>
+                        </div>
+                        
                         <button 
-                            id="erm-chat-send-btn" 
+                            id="tratamiento-save-btn" 
                             class="btn btn-primary"
-                            style="width: 100px;">
-                            Enviar
+                            onclick="guardarPlanTratamiento()"
+                            style="width: 100%; background-color: #27ae60;">
+                            💾 Guardar Plan
                         </button>
                     </div>
                     
                     <button 
                         class="btn btn-secondary"
-                        onclick="cerrarModalERM()"
+                        onclick="cerrarModalTratamiento()"
                         style="margin-top: 10px; background-color: #e74c3c; width: 100%;">
                         Cerrar
                     </button>

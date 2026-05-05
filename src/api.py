@@ -405,6 +405,13 @@ async def crear_paciente(data : dict):
         else:
             print(f"No se puede hacer predicción. modelo_entrenado={modelo_entrenado}, modelo={modelo}, tiene método predecir={hasattr(modelo, 'modelo') if modelo else False}")
         
+        # Guardar respuesta natural en colección separada
+        if respuesta_natural and paciente_guardado:
+            if db_manager.guardar_respuesta_natural(paciente_guardado, respuesta_natural):
+                print(f"✅ Respuesta natural guardada para paciente {paciente_guardado}")
+            else:
+                print(f"⚠️  Error al guardar respuesta natural para paciente {paciente_guardado}")
+        
         return JSONResponse(
             status_code=200,
             content={
@@ -523,6 +530,7 @@ async def obtener_pacientes(filtro: str = ""):
         for paciente in pacientes_cursor:
             pacientes.append({
                 "id": str(paciente.get("_id", "")),
+                "tipo_leucemia": paciente.get("Tipo leucemia", "N/A"),
                 "estado": paciente.get("Estado del paciente", "Desconocido"),
                 "fecha_registro": paciente.get("fecha_registro").isoformat() if paciente.get("fecha_registro") else ""
             })
@@ -644,4 +652,73 @@ async def extract_from_natural_language(data: dict):
             status_code=500,
             content={"status": "error", "message": f"Error extrayendo valor: {str(e)}", "extracted_value": None}
         )
+
+@app.post("/api/tratamiento/guardar")
+async def guardar_plan_tratamiento(data: dict):
+    """Guardar plan de tratamiento (protocolo y fase)"""
+    global db_manager
+    
+    try:
+        paciente_id_str = data.get('paciente_id')
+        protocolo = data.get('protocolo')
+        fase = data.get('fase')
+        
+        if not paciente_id_str or not protocolo or not fase:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Faltan campos requeridos: paciente_id, protocolo, fase"}
+            )
+        
+        # Convertir string a ObjectId si es necesario
+        from bson.objectid import ObjectId
+        try:
+            if isinstance(paciente_id_str, str):
+                paciente_id = ObjectId(paciente_id_str)
+            else:
+                paciente_id = paciente_id_str
+        except Exception as e:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": f"ID de paciente inválido: {str(e)}"}
+            )
+        
+        # Conectar si es necesario
+        if db_manager is None or not db_manager.connected:
+            db_manager = DatabaseManager()
+            uri = os.getenv("MONGODB_URI")
+            if uri:
+                db_manager.uri = uri
+            if not db_manager.conectar("modelo_pacientes", "coleccion1"):
+                return JSONResponse(
+                    status_code=500,
+                    content={"status": "error", "message": "Error al conectar a la base de datos"}
+                )
+        
+        # Guardar el plan de tratamiento
+        if db_manager.guardar_plan_tratamiento(paciente_id, protocolo, fase):
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": "success",
+                    "message": "Plan de tratamiento guardado exitosamente",
+                    "paciente_id": str(paciente_id),
+                    "protocolo": protocolo,
+                    "fase": fase
+                }
+            )
+        else:
+            return JSONResponse(
+                status_code=500,
+                content={"status": "error", "message": "Error al guardar el plan de tratamiento"}
+            )
+    
+    except Exception as e:
+        print(f"Error al guardar plan de tratamiento: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Error al guardar plan de tratamiento: {str(e)}"}
+        )
+        
         

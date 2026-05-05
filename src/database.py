@@ -78,6 +78,47 @@ class DatabaseManager:
         except PyMongoError as e:
             print(f"Error al guardar pacientes: {e}")
             return 0
+    
+    def guardar_respuesta_natural(self, paciente_id, respuesta_natural: str) -> bool:
+        """Guardar respuesta en lenguaje natural en colección separada"""
+        if not self.connected:
+            print("No hay conexión a la base de datos.")
+            return False
+        
+        try:
+            coleccion_respuestas = self.db['respuestas_naturales']
+            documento = {
+                'paciente_id': paciente_id,
+                'respuesta': respuesta_natural,
+                'fecha_creacion': datetime.now()
+            }
+            resultado = coleccion_respuestas.insert_one(documento)
+            print(f"✅ Respuesta natural guardada con ID: {resultado.inserted_id}")
+            return True
+        except PyMongoError as e:
+            print(f"Error al guardar respuesta natural: {e}")
+            return False
+    
+    def guardar_plan_tratamiento(self, paciente_id, protocolo: str, fase: str) -> bool:
+        """Guardar plan de tratamiento en colección separada"""
+        if not self.connected:
+            print("No hay conexión a la base de datos.")
+            return False
+        
+        try:
+            coleccion_planes = self.db['planes_tratamiento']
+            documento = {
+                'paciente_id': paciente_id,
+                'protocolo': protocolo,
+                'fase': fase,
+                'fecha_creacion': datetime.now()
+            }
+            resultado = coleccion_planes.insert_one(documento)
+            print(f"✅ Plan de tratamiento guardado con ID: {resultado.inserted_id}")
+            return True
+        except PyMongoError as e:
+            print(f"Error al guardar plan de tratamiento: {e}")
+            return False
         
     def obtener_pacientes(self) -> pd.DataFrame:
     

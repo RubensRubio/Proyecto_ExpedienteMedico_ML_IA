@@ -289,7 +289,7 @@ function mostrarPacientes(pacientes) {
     if (pacientes.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" style="text-align: center; color: #999;">
+                <td colspan="5" style="text-align: center; color: #999;">
                     No hay pacientes registrados
                 </td>
             </tr>
@@ -315,6 +315,7 @@ function mostrarPacientes(pacientes) {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td><code style="font-weight: bold;">${paciente.id.substring(0, 12)}...</code></td>
+            <td>${paciente.tipo_leucemia || 'N/A'}</td>
             <td>
                 <span style="
                     padding: 4px 8px; 
@@ -332,11 +333,11 @@ function mostrarPacientes(pacientes) {
             <td>${fechaFormato}</td>
             <td>
                 <button 
-                    class="btn-erm" 
-                    onclick="agregarERM('${paciente.id}')"
+                    class="btn-tratamiento" 
+                    onclick="agregarTratamiento('${paciente.id}')"
                     style="
                         padding: 6px 12px;
-                        background-color: #007bff;
+                        background-color: #27ae60;
                         color: white;
                         border: none;
                         border-radius: 4px;
@@ -344,10 +345,10 @@ function mostrarPacientes(pacientes) {
                         font-size: 0.9em;
                         font-weight: 500;
                     "
-                    onmouseover="this.style.backgroundColor='#0056b3'"
-                    onmouseout="this.style.backgroundColor='#007bff'"
+                    onmouseover="this.style.backgroundColor='#1e8449'"
+                    onmouseout="this.style.backgroundColor='#27ae60'"
                 >
-                    Agregar ERM
+                    Agregar Tratamiento
                 </button>
             </td>
         `;
@@ -362,7 +363,7 @@ function mostrarError(mensaje) {
     const tbody = document.getElementById('tabla-pacientes-body');
     tbody.innerHTML = `
         <tr>
-            <td colspan="4" style="text-align: center; color: #e74c3c;">
+            <td colspan="5" style="text-align: center; color: #e74c3c;">
                 ❌ ${mensaje}
             </td>
         </tr>
@@ -370,40 +371,73 @@ function mostrarError(mensaje) {
 }
 
 // ============================================================================
-// FUNCIÓN: AGREGAR ERM
+// FUNCIÓN: AGREGAR TRATAMIENTO
 // ============================================================================
 
-function agregarERM(pacienteId) {
-    console.log('📝 Abriendo modal ERM para paciente:', pacienteId);
-    abrirModalERM(pacienteId);
+function agregarTratamiento(pacienteId) {
+    console.log('💊 Abriendo modal de tratamiento para paciente:', pacienteId);
+    abrirModalTratamiento(pacienteId);
 }
 
-function abrirModalERM(pacienteId) {
-    const modal = document.getElementById('modal-erm');
+function abrirModalTratamiento(pacienteId) {
+    const modal = document.getElementById('modal-tratamiento');
     modal.style.display = 'flex';
-    modal.pacienteId = pacienteId;  // Guardar el ID para uso posterior
+    window.tratamientoState = { pacienteId: pacienteId };
     
-    // Limpiar mensajes previos
-    const messagesDiv = document.getElementById('erm-chat-messages');
-    messagesDiv.innerHTML = `
-        <div class="chat-message assistant">
-            <div class="message-content">
-                👋 Hola, voy a ayudarte a registrar el ERM (Expediente Resultado Médico) para el paciente ${pacienteId.substring(0, 12)}...
-            </div>
-        </div>
-    `;
+    // Resetear selects
+    document.getElementById('protocolo-select').value = '';
+    document.getElementById('fase-select').value = '';
     
-    // Enfocar el input
-    document.getElementById('erm-chat-input').focus();
-    
-    console.log('✅ Modal ERM abierto para paciente:', pacienteId);
+    console.log('✅ Modal de tratamiento abierto para paciente:', pacienteId);
 }
 
-function cerrarModalERM() {
-    const modal = document.getElementById('modal-erm');
+function cerrarModalTratamiento() {
+    const modal = document.getElementById('modal-tratamiento');
     modal.style.display = 'none';
-    document.getElementById('erm-chat-input').value = '';
-    console.log('✅ Modal ERM cerrado');
+    console.log('✅ Modal de tratamiento cerrado');
+}
+
+async function guardarPlanTratamiento() {
+    const pacienteId = window.tratamientoState?.pacienteId;
+    const protocolo = document.getElementById('protocolo-select').value;
+    const fase = document.getElementById('fase-select').value;
+    
+    if (!protocolo || !fase) {
+        alert('⚠️  Por favor completa todos los campos');
+        return;
+    }
+    
+    if (!pacienteId) {
+        alert('❌ Error: No se encontró el ID del paciente');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/tratamiento/guardar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                paciente_id: pacienteId,
+                protocolo: protocolo,
+                fase: fase
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            console.log('✅ Plan de tratamiento guardado:', data);
+            alert(`✅ Plan de tratamiento guardado:\n\nProtocolo: ${protocolo}\nFase: ${fase}`);
+            cerrarModalTratamiento();
+        } else {
+            alert(`❌ Error: ${data.message}`);
+        }
+    } catch (error) {
+        console.error('Error al guardar plan:', error);
+        alert('❌ Error al guardar el plan de tratamiento');
+    }
 }
 
 // ============================================================================
