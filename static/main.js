@@ -289,7 +289,7 @@ function mostrarPacientes(pacientes) {
     if (pacientes.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="5" style="text-align: center; color: #999;">
+                <td colspan="7" style="text-align: center; color: #999;">
                     No hay pacientes registrados
                 </td>
             </tr>
@@ -311,6 +311,57 @@ function mostrarPacientes(pacientes) {
             hour: '2-digit',
             minute: '2-digit'
         });
+        
+        // Formatear fecha del tratamiento si existe
+        const fechaTratamiento = paciente.fecha_tratamiento 
+            ? new Date(paciente.fecha_tratamiento).toLocaleDateString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+              })
+            : '-';
+        
+        // Determinar qué botón mostrar
+        const tieneTratamiento = !!paciente.fecha_tratamiento;
+        const botonAccion = tieneTratamiento 
+            ? `<button 
+                    class="btn-erm" 
+                    onclick="agregarERM('${paciente.id}')"
+                    style="
+                        padding: 6px 12px;
+                        background-color: #007bff;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 0.9em;
+                        font-weight: 500;
+                    "
+                    onmouseover="this.style.backgroundColor='#0056b3'"
+                    onmouseout="this.style.backgroundColor='#007bff'"
+                >
+                    Ver ERM
+                </button>`
+            : `<button 
+                    class="btn-tratamiento" 
+                    onclick="agregarTratamiento('${paciente.id}')"
+                    style="
+                        padding: 6px 12px;
+                        background-color: #27ae60;
+                        color: white;
+                        border: none;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 0.9em;
+                        font-weight: 500;
+                    "
+                    onmouseover="this.style.backgroundColor='#1e8449'"
+                    onmouseout="this.style.backgroundColor='#27ae60'"
+                >
+                    Agregar Tratamiento
+                </button>`;
 
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -330,27 +381,22 @@ function mostrarPacientes(pacientes) {
                     ${paciente.estado}
                 </span>
             </td>
-            <td>${fechaFormato}</td>
             <td>
-                <button 
-                    class="btn-tratamiento" 
-                    onclick="agregarTratamiento('${paciente.id}')"
-                    style="
-                        padding: 6px 12px;
-                        background-color: #27ae60;
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-size: 0.9em;
-                        font-weight: 500;
-                    "
-                    onmouseover="this.style.backgroundColor='#1e8449'"
-                    onmouseout="this.style.backgroundColor='#27ae60'"
-                >
-                    Agregar Tratamiento
-                </button>
+                <span style="
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 0.9em;
+                    font-weight: 500;
+                    ${paciente.estatus_tratamiento === 'Proceso' ? 'background: #fff3cd; color: #856404;' :
+                      paciente.estatus_tratamiento === 'Completado' ? 'background: #d4edda; color: #155724;' :
+                      'background: #e2e3e5; color: #383d41;'}
+                ">
+                    ${paciente.estatus_tratamiento || '-'}
+                </span>
             </td>
+            <td>${fechaTratamiento}</td>
+            <td>${fechaFormato}</td>
+            <td>${botonAccion}</td>
         `;
         tbody.appendChild(row);
     });
@@ -363,52 +409,154 @@ function mostrarError(mensaje) {
     const tbody = document.getElementById('tabla-pacientes-body');
     tbody.innerHTML = `
         <tr>
-            <td colspan="5" style="text-align: center; color: #e74c3c;">
+            <td colspan="7" style="text-align: center; color: #e74c3c;">
                 ❌ ${mensaje}
             </td>
         </tr>
     `;
 }
 
-// ============================================================================
 // FUNCIÓN: AGREGAR TRATAMIENTO
 // ============================================================================
 
+let tratamientoState = {
+    conversationActive: false,
+    currentQuestionIndex: 0,
+    extractedData: {},
+    pacienteId: null,
+    questions: [
+        {
+            question: '¿Cuál es el protocolo de tratamiento? (Protocolo XV o Protocolo New York)',
+            field: 'protocolo',
+            options: ['Protocolo XV', 'Protocolo New York']
+        },
+        {
+            question: '¿Cuál es la fase del tratamiento? (Inducción, Consolidación o Mantenimiento)',
+            field: 'fase',
+            options: ['Inducción', 'Consolidación', 'Mantenimiento']
+        }
+    ]
+};
+
 function agregarTratamiento(pacienteId) {
-    console.log('💊 Abriendo modal de tratamiento para paciente:', pacienteId);
+    console.log('💊 Abriendo chat de tratamiento para paciente:', pacienteId);
     abrirModalTratamiento(pacienteId);
 }
 
 function abrirModalTratamiento(pacienteId) {
     const modal = document.getElementById('modal-tratamiento');
     modal.style.display = 'flex';
-    window.tratamientoState = { pacienteId: pacienteId };
     
-    // Resetear selects
-    document.getElementById('protocolo-select').value = '';
-    document.getElementById('fase-select').value = '';
+    // Resetear estado del chat
+    tratamientoState = {
+        conversationActive: true,
+        currentQuestionIndex: 0,
+        extractedData: {},
+        pacienteId: pacienteId,
+        questions: [
+            {
+                question: '¿Cuál es el protocolo de tratamiento? (Protocolo XV o Protocolo New York)',
+                field: 'protocolo',
+                options: ['Protocolo XV', 'Protocolo New York']
+            },
+            {
+                question: '¿Cuál es la fase del tratamiento? (Inducción, Consolidación o Mantenimiento)',
+                field: 'fase',
+                options: ['Inducción', 'Consolidación', 'Mantenimiento']
+            }
+        ]
+    };
+    
+    // Limpiar mensajes
+    const messagesDiv = document.getElementById('tratamiento-chat-messages');
+    messagesDiv.innerHTML = `
+        <div class="chat-message assistant">
+            <div class="message-content">
+                👋 Hola, voy a ayudarte a registrar el plan de tratamiento. Responde en lenguaje natural.
+            </div>
+        </div>
+    `;
+    
+    // Hacer la primera pregunta
+    hacerSiguientePreguntaTratamiento();
+    
+    // Limpiar input y enfocar
+    document.getElementById('tratamiento-chat-input').value = '';
+    document.getElementById('tratamiento-chat-input').focus();
     
     console.log('✅ Modal de tratamiento abierto para paciente:', pacienteId);
 }
 
-function cerrarModalTratamiento() {
-    const modal = document.getElementById('modal-tratamiento');
-    modal.style.display = 'none';
-    console.log('✅ Modal de tratamiento cerrado');
+function hacerSiguientePreguntaTratamiento() {
+    if (tratamientoState.currentQuestionIndex < tratamientoState.questions.length) {
+        const pregunta = tratamientoState.questions[tratamientoState.currentQuestionIndex];
+        addMessageTratamiento('assistant', pregunta.question);
+    } else {
+        finalizarChatTratamiento();
+    }
 }
 
-async function guardarPlanTratamiento() {
-    const pacienteId = window.tratamientoState?.pacienteId;
-    const protocolo = document.getElementById('protocolo-select').value;
-    const fase = document.getElementById('fase-select').value;
+function addMessageTratamiento(sender, text) {
+    const messagesDiv = document.getElementById('tratamiento-chat-messages');
+    const mensaje = document.createElement('div');
+    mensaje.className = `chat-message ${sender}`;
+    mensaje.innerHTML = `<div class="message-content">${text.replace(/\n/g, '<br>')}</div>`;
+    messagesDiv.appendChild(mensaje);
+    
+    // Scroll al final
+    const container = document.getElementById('tratamiento-chat-container');
+    container.scrollTop = container.scrollHeight;
+}
+
+function enviarMensajeTratamiento() {
+    const input = document.getElementById('tratamiento-chat-input');
+    const mensaje = input.value.trim();
+    
+    if (!mensaje) return;
+    
+    // Mostrar mensaje del usuario
+    addMessageTratamiento('user', mensaje);
+    input.value = '';
+    
+    if (tratamientoState.currentQuestionIndex < tratamientoState.questions.length) {
+        const pregunta = tratamientoState.questions[tratamientoState.currentQuestionIndex];
+        const field = pregunta.field;
+        
+        // Extraer valor basado en opciones disponibles
+        let valor = null;
+        const mensajeLower = mensaje.toLowerCase();
+        
+        for (const opcion of pregunta.options) {
+            if (mensajeLower.includes(opcion.toLowerCase())) {
+                valor = opcion;
+                break;
+            }
+        }
+        
+        if (!valor) {
+            addMessageTratamiento('assistant', `❌ Por favor especifica una de estas opciones: ${pregunta.options.join(', ')}`);
+        } else {
+            tratamientoState.extractedData[field] = valor;
+            addMessageTratamiento('assistant', `✅ ${field}: ${valor}`);
+            
+            tratamientoState.currentQuestionIndex++;
+            
+            // Esperar un poco antes de hacer la siguiente pregunta
+            setTimeout(() => {
+                hacerSiguientePreguntaTratamiento();
+                document.getElementById('tratamiento-chat-input').focus();
+            }, 500);
+        }
+    }
+}
+
+async function finalizarChatTratamiento() {
+    const pacienteId = tratamientoState.pacienteId;
+    const protocolo = tratamientoState.extractedData.protocolo;
+    const fase = tratamientoState.extractedData.fase;
     
     if (!protocolo || !fase) {
-        alert('⚠️  Por favor completa todos los campos');
-        return;
-    }
-    
-    if (!pacienteId) {
-        alert('❌ Error: No se encontró el ID del paciente');
+        addMessageTratamiento('assistant', '❌ Error: No se completaron todos los datos. Por favor cierra e intenta de nuevo.');
         return;
     }
     
@@ -428,16 +576,35 @@ async function guardarPlanTratamiento() {
         const data = await response.json();
         
         if (data.status === 'success') {
-            console.log('✅ Plan de tratamiento guardado:', data);
-            alert(`✅ Plan de tratamiento guardado:\n\nProtocolo: ${protocolo}\nFase: ${fase}`);
-            cerrarModalTratamiento();
+            addMessageTratamiento('assistant', `✅ Plan de tratamiento guardado correctamente!\n\nProtocolo: ${protocolo}\nFase: ${fase}\n\nPuedes cerrar este modal.`);
+            
+            // Recargar tabla después de 2 segundos
+            setTimeout(() => {
+                cargarPacientes();
+                cerrarModalTratamiento();
+            }, 2000);
         } else {
-            alert(`❌ Error: ${data.message}`);
+            addMessageTratamiento('assistant', `❌ Error: ${data.message}`);
         }
     } catch (error) {
-        console.error('Error al guardar plan:', error);
-        alert('❌ Error al guardar el plan de tratamiento');
+        console.error('Error:', error);
+        addMessageTratamiento('assistant', `❌ Error al guardar: ${error.message}`);
     }
+}
+
+function cerrarModalTratamiento() {
+    const modal = document.getElementById('modal-tratamiento');
+    modal.style.display = 'none';
+    tratamientoState.conversationActive = false;
+    console.log('✅ Modal de tratamiento cerrado');
+}
+
+// ============================================================================
+// FUNCIÓN: AGREGAR ERM (placeholder for future implementation)
+// ============================================================================
+function agregarERM(pacienteId) {
+    alert('Función ERM en desarrollo...');
+    console.log('📝 ERM para paciente:', pacienteId);
 }
 
 // ============================================================================

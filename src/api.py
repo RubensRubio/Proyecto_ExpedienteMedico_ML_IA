@@ -532,6 +532,8 @@ async def obtener_pacientes(filtro: str = ""):
                 "id": str(paciente.get("_id", "")),
                 "tipo_leucemia": paciente.get("Tipo leucemia", "N/A"),
                 "estado": paciente.get("Estado del paciente", "Desconocido"),
+                "estatus_tratamiento": paciente.get("estatus_tratamiento"),
+                "fecha_tratamiento": paciente.get("fecha_tratamiento").isoformat() if paciente.get("fecha_tratamiento") else None,
                 "fecha_registro": paciente.get("fecha_registro").isoformat() if paciente.get("fecha_registro") else ""
             })
         
@@ -696,6 +698,21 @@ async def guardar_plan_tratamiento(data: dict):
         
         # Guardar el plan de tratamiento
         if db_manager.guardar_plan_tratamiento(paciente_id, protocolo, fase):
+            # Actualizar el documento del paciente con el estatus y fecha del tratamiento
+            from datetime import datetime
+            actualizado = db_manager.actualizar_paciente(
+                paciente_id, 
+                {
+                    'estatus_tratamiento': 'Proceso',
+                    'fecha_tratamiento': datetime.now()
+                }
+            )
+            
+            if actualizado:
+                print(f"✅ Documento del paciente actualizado con estatus y fecha del tratamiento")
+            else:
+                print(f"⚠️  Advertencia: No se pudo actualizar el documento del paciente")
+            
             return JSONResponse(
                 status_code=200,
                 content={

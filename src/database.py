@@ -119,6 +119,29 @@ class DatabaseManager:
         except PyMongoError as e:
             print(f"Error al guardar plan de tratamiento: {e}")
             return False
+    
+    def actualizar_paciente(self, paciente_id, campos_actualizacion: Dict) -> bool:
+        """Actualizar campos específicos de un paciente"""
+        if not self.connected:
+            print("No hay conexión a la base de datos.")
+            return False
+        
+        try:
+            resultado = self.collection.update_one(
+                {"_id": paciente_id},
+                {"$set": campos_actualizacion}
+            )
+            
+            if resultado.matched_count > 0:
+                print(f"✅ Paciente {paciente_id} actualizado con campos: {list(campos_actualizacion.keys())}")
+                return True
+            else:
+                print(f"⚠️  Paciente {paciente_id} no encontrado para actualizar")
+                return False
+        except PyMongoError as e:
+            print(f"Error al actualizar paciente: {e}")
+            return False
+            return False
         
     def obtener_pacientes(self) -> pd.DataFrame:
     
