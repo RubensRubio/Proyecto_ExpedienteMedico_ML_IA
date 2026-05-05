@@ -497,17 +497,43 @@ async def obtener_pacientes(filtro: str = ""):
     
     try:
         if db_manager is None:
+            print("🔍 DEBUG: db_manager es None, inicializando...")
             db_manager = DatabaseManager()
             uri = os.getenv("MONGODB_URI")
             
+            print(f"📍 MONGODB_URI disponible: {'Sí' if uri else 'No'}")
             if uri:
+                print(f"   URI preview: {uri[:80]}...")
                 db_manager.uri = uri
-                
-            if not db_manager.conectar("modelo_pacientes", "coleccion1"):
+            else:
+                print("❌ MONGODB_URI no configurada en variables de entorno")
+            
+            conexion_exitosa = db_manager.conectar("modelo_pacientes", "coleccion1")
+            print(f"📊 Resultado de conexión: {conexion_exitosa}")
+            print(f"   db_manager.connected: {db_manager.connected}")
+            print(f"   db_manager.collection: {db_manager.collection}")
+            
+            if not conexion_exitosa or db_manager.collection is None:
                 return JSONResponse(
-                    status_code=500,
-                    content={"status": "error", "message": "Error al conectar a la base de datos"}
+                    status_code=503,
+                    content={
+                        "status": "error",
+                        "message": "Error al conectar a la base de datos MongoDB",
+                        "details": "La conexión a MongoDB falló. Verifica que MONGODB_URI esté configurado correctamente en Render."
+                    }
                 )
+        
+        # Validar que collection está disponible
+        if db_manager.collection is None:
+            print("❌ ERROR: db_manager.collection es None")
+            return JSONResponse(
+                status_code=503,
+                content={
+                    "status": "error",
+                    "message": "La colección no está disponible",
+                    "details": "db_manager.collection es None - conexión no inicializada"
+                }
+            )
         
         # Crear filtro de búsqueda si existe
         query = {}

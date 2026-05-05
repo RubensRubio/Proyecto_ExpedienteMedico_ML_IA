@@ -145,9 +145,9 @@ class DatabaseManager:
         
     def obtener_pacientes(self) -> pd.DataFrame:
     
-        if not self.connected:
+        if not self.connected or self.collection is None:
                     print("No hay conexión a la base de datos.")
-                    return False
+                    return pd.DataFrame()
                 
         try:
             datos = list(self.collection.find({}, {"_id": 0}))
@@ -161,9 +161,9 @@ class DatabaseManager:
         
     def obtener_pacientes_por_riesgo(self, riesgo:str) -> pd.DataFrame:
     
-        if not self.connected:
+        if not self.connected or self.collection is None:
                     print("No hay conexión a la base de datos.")
-                    return False
+                    return pd.DataFrame()
                 
         try:
             datos = list(self.collection.find({"Riesgo calculado": riesgo}, {"_id": 0}))
@@ -190,7 +190,7 @@ class DatabaseManager:
         return self.obtener_pacientes()
         
     def obtener_estadisticas(self) -> Dict:
-        if not self.connected:
+        if not self.connected or self.collection is None:
             print("No hay conexión a la base de datos.")
             return {}
         
