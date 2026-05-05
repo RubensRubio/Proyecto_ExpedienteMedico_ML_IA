@@ -303,12 +303,13 @@ class ModeloPredictorEstadoPaciente:
             # ========== CRITERIO CLÍNICO: BLASTOS >= 20% ==========
             # Si el número de blastos es >= 20%, es diagnóstico de leucemia
             # y requiere tratamiento obligatorio
+            # NOTA: El usuario ingresa el porcentaje directamente en escala 0-100 (ej: 10, 25, 42)
             num_blastos = None
             if 'Número de blastos' in datos_paciente.columns:
                 num_blastos = float(datos_paciente['Número de blastos'].values[0])
-                print(f"   🔬 Número de blastos: {num_blastos:.2%} (valor: {num_blastos})")
+                print(f"   🔬 Número de blastos: {num_blastos:.1f}% (valor: {num_blastos})")
                 
-                if num_blastos >= 0.20:  # 20% o más
+                if num_blastos >= 20:  # 20% o más (valor ya en escala 0-100)
                     print(f"   ⚠️  CRITERIO CLÍNICO ACTIVADO: Blastos >= 20%")
                     print(f"   🏥 DIAGNÓSTICO AUTOMÁTICO: TRATAMIENTO OBLIGATORIO")
                     print(f"   💊 Razón: Alto porcentaje de blastos indica leucemia confirmada")

@@ -180,10 +180,8 @@ document.getElementById('form-paciente').addEventListener('submit', async functi
         // Convertir booleano
         datos['Resistencia al tratamiento'] = datos['Resistencia al tratamiento'] === 'true';
         
-        // Convertir Número de blastos de porcentaje (0-100) a decimal (0-1)
-        if (datos['Número de blastos']) {
-            datos['Número de blastos'] = parseFloat(datos['Número de blastos']) / 100;
-        }
+        // Nota: El número de blastos ya se captura en escala 0-100 (ej: 10, 25, 42)
+        // No se requiere conversión adicional
 
         // Enviar POST
         const response = await fetch(`${API_BASE}/api/paciente/nuevo`, {
