@@ -623,9 +623,10 @@ footer {
 }
 
 .tabla-pacientes thead th {
-    background-color: #f5f5f5;
+    background: linear-gradient(135deg, #1565C0 0%, #0D47A1 100%);
+    color: white !important;
     font-weight: 600;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 2px solid #0D47A1;
     white-space: nowrap;
     padding: 14px 10px !important;
     font-size: 1em;

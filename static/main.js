@@ -352,6 +352,7 @@ function mostrarPacientes(pacientes) {
                 <div id="menu-${paciente.id}" class="menu-acciones" style="display: none; background: white; border: 1px solid #ddd; border-radius: 4px;">
                     <button onclick="mostrarResultado('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 12px 15px; border: none; background: none; cursor: pointer; font-size: 0.95em; border-bottom: 1px solid #eee;">📊 Mostrar Resultado</button>
                     <button onclick="abrirModalOtroDiagnostico('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 12px 15px; border: none; background: none; cursor: pointer; font-size: 0.95em; border-bottom: 1px solid #eee;">📋 Otro Diagnóstico</button>
+                    ${paciente.estatus_tratamiento && paciente.estatus_tratamiento !== '-' ? `<button onclick="abrirModalERM('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 12px 15px; border: none; background: none; cursor: pointer; font-size: 0.95em; border-bottom: 1px solid #eee;">🗂️ Capturar ERM</button>` : ''}
                     <button onclick="abrirModalDefuncion('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 12px 15px; border: none; background: none; cursor: pointer; font-size: 0.95em; color: #c0392b;">⚰️ Defunción</button>
                 </div>
             </div>
@@ -1537,4 +1538,83 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Cargar pacientes al abrir la aplicación
+// ============================================================================
+// FUNCIONES PARA MODAL ERM
+// ============================================================================
+
+let pacienteERMActual = null;
+
+function abrirModalERM(pacienteId) {
+    pacienteERMActual = pacienteId;
+    const modal = document.getElementById('modal-erm');
+    const pacienteIdSpan = document.getElementById('erm-paciente-id');
+    
+    pacienteIdSpan.textContent = pacienteId.substring(0, 12) + '...';
+    
+    // Limpiar mensajes previos
+    const messagesContainer = document.getElementById('erm-chat-messages');
+    messagesContainer.innerHTML = `
+        <div class="chat-message assistant">
+            <div class="message-content">
+                👋 Bienvenido a la captura de ERM. Aquí puedes documentar la enfermedad residual mínima (ERM). Por favor, ingresa los hallazgos y observaciones relevantes.
+            </div>
+        </div>
+    `;
+    
+    // Limpiar input
+    const input = document.getElementById('erm-chat-input');
+    input.value = '';
+    
+    modal.style.display = 'flex';
+}
+
+function cerrarModalERM() {
+    const modal = document.getElementById('modal-erm');
+    modal.style.display = 'none';
+    pacienteERMActual = null;
+}
+
+function enviarMensajeERM() {
+    const input = document.getElementById('erm-chat-input');
+    const mensaje = input.value.trim();
+    
+    if (!mensaje) return;
+    
+    // Agregar mensaje del usuario
+    const messagesContainer = document.getElementById('erm-chat-messages');
+    const userMessageDiv = document.createElement('div');
+    userMessageDiv.className = 'chat-message user';
+    userMessageDiv.innerHTML = `<div class="message-content">${mensaje}</div>`;
+    messagesContainer.appendChild(userMessageDiv);
+    
+    // Limpiar input
+    input.value = '';
+    
+    // Auto-scroll al final
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    // Simular respuesta del asistente después de un pequeño delay
+    setTimeout(() => {
+        const assistantMessageDiv = document.createElement('div');
+        assistantMessageDiv.className = 'chat-message assistant';
+        assistantMessageDiv.innerHTML = `
+            <div class="message-content">
+                ✅ Nota registrada para ERM del paciente. Por favor continúa proporcionando más información si es necesario.
+            </div>
+        `;
+        messagesContainer.appendChild(assistantMessageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }, 500);
+}
+
+// Cerrar modal al presionar Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const modalERM = document.getElementById('modal-erm');
+        if (modalERM && modalERM.style.display === 'flex') {
+            cerrarModalERM();
+        }
+    }
+});
+
 document.addEventListener('DOMContentLoaded', () => cargarPacientes());

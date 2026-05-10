@@ -633,15 +633,36 @@ async def obtener_respuesta_natural(paciente_id: str):
         if not paciente:
             return JSONResponse(status_code=404, content={"status": "error", "message": "Paciente no encontrado"})
         
-        # Retornar el pronóstico/diagnóstico
-        respuesta_natural = paciente.get("prediccion_natural", "No disponible")
+        # Primero intentar obtener de prediccion_natural
+        respuesta_natural = paciente.get("prediccion_natural", None)
+        
+        # Si no hay prediccion_natural, buscar en la colección respuestas_naturales
+        if not respuesta_natural or respuesta_natural == "No disponible":
+            db = db_manager.db
+            
+            # Intentar buscar por ObjectId primero, luego por string
+            respuesta_doc = db.respuestas_naturales.find_one(
+                {"paciente_id": oid},
+                {"respuesta": 1, "_id": 0}
+            )
+            
+            # Si no lo encuentra por ObjectId, intentar por string
+            if not respuesta_doc:
+                respuesta_doc = db.respuestas_naturales.find_one(
+                    {"paciente_id": paciente_id},
+                    {"respuesta": 1, "_id": 0}
+                )
+            
+            if respuesta_doc and respuesta_doc.get("respuesta"):
+                respuesta_natural = respuesta_doc.get("respuesta")
+        
         riesgo = paciente.get("Riesgo calculado", "-")
         estado = paciente.get("Estado del paciente", "Desconocido")
         
         return JSONResponse(status_code=200, content={
             "status": "success",
             "paciente_id": paciente_id,
-            "respuesta_natural": respuesta_natural,
+            "respuesta_natural": respuesta_natural if respuesta_natural else "No disponible",
             "riesgo_calculado": riesgo,
             "estado": estado
         })
