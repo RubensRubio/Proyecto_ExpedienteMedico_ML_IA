@@ -191,21 +191,22 @@
                 </div>
                 
                 <div id="tabla-pacientes-container" style="width: 100%; overflow: visible;">
-                    <table id="tabla-pacientes" class="tabla-pacientes" style="width: 100%; border-collapse: collapse;">
+                    <table id="tabla-pacientes" class="tabla-pacientes" style="width: 100%; border-collapse: collapse; font-size: 0.9em;">
                         <thead>
                             <tr>
-                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">ID Paciente</th>
-                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">Leucemia</th>
-                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">Estado</th>
-                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">Est. Trat.</th>
-                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">Fecha Trat.</th>
-                                <th style="padding: 12px 8px; text-align: left; font-size: 0.95em;">Reg.</th>
-                                <th style="padding: 12px 8px; text-align: center; font-size: 0.95em;">Acción</th>
+                                <th style="padding: 10px 6px; text-align: left; font-size: 0.9em; min-width: 120px;">ID Paciente</th>
+                                <th style="padding: 10px 6px; text-align: center; font-size: 0.9em; min-width: 80px;">Leucemia</th>
+                                <th style="padding: 10px 6px; text-align: center; font-size: 0.9em; min-width: 100px;">Estado</th>
+                                <th style="padding: 10px 6px; text-align: center; font-size: 0.9em; min-width: 90px;">Riesgo</th>
+                                <th style="padding: 10px 6px; text-align: center; font-size: 0.9em; min-width: 100px;">Est. Trat.</th>
+                                <th style="padding: 10px 6px; text-align: center; font-size: 0.9em; min-width: 130px;">Fecha Trat.</th>
+                                <th style="padding: 10px 6px; text-align: center; font-size: 0.9em; min-width: 130px;">Registro</th>
+                                <th style="padding: 10px 6px; text-align: center; font-size: 0.9em; min-width: 80px;">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-pacientes-body">
                             <tr>
-                                <td colspan="7" style="text-align: center; color: #999; padding: 20px;">
+                                <td colspan="8" style="text-align: center; color: #999; padding: 20px;">
                                     Cargando pacientes...
                                 </td>
                             </tr>
@@ -337,6 +338,93 @@
                         style="background-color: #e74c3c; width: 100%;">
                         Cerrar
                     </button>
+                </div>
+            </div>
+
+            <!-- MODAL MOSTRAR RESULTADO/DIAGNÓSTICO -->
+            <div id="modal-resultado" class="modal" style="display: none;">
+                <div class="modal-content" style="width: 90%; max-width: 800px;">
+                    <div class="modal-header">
+                        <h2>📊 Resultado del Análisis</h2>
+                        <button class="modal-close" onclick="cerrarModalResultado()">&times;</button>
+                    </div>
+                    <div id="modal-resultado-contenido" style="padding: 20px; max-height: 600px; overflow-y: auto; line-height: 1.6;">
+                        Cargando resultado...
+                    </div>
+                    <button 
+                        class="btn btn-secondary"
+                        onclick="cerrarModalResultado()"
+                        style="background-color: #3498db; width: 100%; margin-top: 15px;">
+                        Cerrar
+                    </button>
+                </div>
+            </div>
+
+            <!-- MODAL OTRO DIAGNÓSTICO -->
+            <div id="modal-otro-diagnostico" class="modal" style="display: none;">
+                <div class="modal-content" style="width: 90%; max-width: 600px;">
+                    <div class="modal-header">
+                        <h2>📋 Registrar Otro Diagnóstico</h2>
+                        <button class="modal-close" onclick="cerrarModalOtroDiagnostico()">&times;</button>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 10px; font-weight: bold;">¿Cuál fue el otro diagnóstico?</label>
+                            <textarea 
+                                id="otro-diagnostico-input"
+                                placeholder="Escribe el diagnóstico adicional..."
+                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: Arial; font-size: 1em; resize: vertical; min-height: 100px;">
+                            </textarea>
+                        </div>
+                    </div>
+                    <div style="padding: 20px; display: flex; gap: 10px;">
+                        <button 
+                            class="btn btn-primary"
+                            onclick="guardarOtroDiagnostico()"
+                            style="flex: 1;">
+                            Guardar Diagnóstico
+                        </button>
+                        <button 
+                            class="btn btn-secondary"
+                            onclick="cerrarModalOtroDiagnostico()"
+                            style="flex: 1; background-color: #e74c3c;">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MODAL DEFUNCIÓN -->
+            <div id="modal-defuncion" class="modal" style="display: none;">
+                <div class="modal-content" style="width: 90%; max-width: 600px;">
+                    <div class="modal-header">
+                        <h2>⚰️ Registrar Defunción</h2>
+                        <button class="modal-close" onclick="cerrarModalDefuncion()">&times;</button>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 10px; font-weight: bold;">¿Cuál fue el motivo de la defunción?</label>
+                            <textarea 
+                                id="defuncion-motivo-input"
+                                placeholder="Especifica el motivo..."
+                                style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: Arial; font-size: 1em; resize: vertical; min-height: 100px;">
+                            </textarea>
+                        </div>
+                    </div>
+                    <div style="padding: 20px; display: flex; gap: 10px;">
+                        <button 
+                            class="btn btn-primary"
+                            onclick="guardarDefuncion()"
+                            style="flex: 1; background-color: #c0392b;">
+                            Confirmar Defunción
+                        </button>
+                        <button 
+                            class="btn btn-secondary"
+                            onclick="cerrarModalDefuncion()"
+                            style="flex: 1; background-color: #e74c3c;">
+                            Cancelar
+                        </button>
+                    </div>
                 </div>
             </div>
 

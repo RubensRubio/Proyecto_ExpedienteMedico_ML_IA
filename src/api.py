@@ -580,6 +580,7 @@ async def obtener_pacientes(filtro: str = ""):
                 "id": str(paciente.get("_id", "")),
                 "tipo_leucemia": paciente.get("Tipo leucemia", "N/A"),
                 "estado": paciente.get("Estado del paciente", "Desconocido"),
+                "riesgo_calculado": paciente.get("Riesgo calculado", "-"),
                 "estatus_tratamiento": paciente.get("estatus_tratamiento"),
                 "fecha_tratamiento": paciente.get("fecha_tratamiento").isoformat() if paciente.get("fecha_tratamiento") else None,
                 "fecha_registro": paciente.get("fecha_registro").isoformat() if paciente.get("fecha_registro") else ""
@@ -604,6 +605,148 @@ async def obtener_pacientes(filtro: str = ""):
             status_code=500,
             content={"status": "error", "message": f"Error al obtener pacientes: {str(e)}"}
         )
+
+
+# ============================================================================
+# ENDPOINT: OBTENER RESPUESTA NATURAL (DIAGNÓSTICO) DEL PACIENTE
+@app.get("/api/paciente/{paciente_id}/respuesta-natural")
+async def obtener_respuesta_natural(paciente_id: str):
+    """Obtener la respuesta natural (diagnóstico) generado para un paciente"""
+    
+    try:
+        from bson import ObjectId
+        
+        if db_manager is None or not db_manager.connected:
+            return JSONResponse(status_code=503, content={"status": "error", "message": "BD no conectada"})
+        
+        # Obtener documento del paciente
+        try:
+            oid = ObjectId(paciente_id)
+        except:
+            oid = ObjectId.from_string(paciente_id) if len(paciente_id) == 24 else None
+        
+        if not oid:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "ID inválido"})
+        
+        paciente = db_manager.collection.find_one({"_id": oid})
+        
+        if not paciente:
+            return JSONResponse(status_code=404, content={"status": "error", "message": "Paciente no encontrado"})
+        
+        # Retornar el pronóstico/diagnóstico
+        respuesta_natural = paciente.get("prediccion_natural", "No disponible")
+        riesgo = paciente.get("Riesgo calculado", "-")
+        estado = paciente.get("Estado del paciente", "Desconocido")
+        
+        return JSONResponse(status_code=200, content={
+            "status": "success",
+            "paciente_id": paciente_id,
+            "respuesta_natural": respuesta_natural,
+            "riesgo_calculado": riesgo,
+            "estado": estado
+        })
+        
+    except Exception as e:
+        print(f"❌ Error al obtener respuesta natural: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+# ============================================================================
+# ENDPOINT: GUARDAR OTRO DIAGNÓSTICO
+@app.post("/api/paciente/{paciente_id}/otro-diagnostico")
+async def guardar_otro_diagnostico(paciente_id: str, data: dict):
+    """Guardar otro diagnóstico del paciente y cambiar su estado"""
+    
+    try:
+        from bson import ObjectId
+        from datetime import datetime
+        
+        if db_manager is None or not db_manager.connected:
+            return JSONResponse(status_code=503, content={"status": "error", "message": "BD no conectada"})
+        
+        # Convertir ID
+        try:
+            oid = ObjectId(paciente_id)
+        except:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "ID inválido"})
+        
+        otro_diagnostico = data.get("diagnostico", "").strip()
+        if not otro_diagnostico:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "Diagnóstico vacío"})
+        
+        # Actualizar documento
+        resultado = db_manager.collection.update_one(
+            {"_id": oid},
+            {
+                "$set": {
+                    "Estado del paciente": "Otro diagnóstico",
+                    "otro_diagnostico": otro_diagnostico,
+                    "fecha_otro_diagnostico": datetime.now()
+                }
+            }
+        )
+        
+        if resultado.matched_count == 0:
+            return JSONResponse(status_code=404, content={"status": "error", "message": "Paciente no encontrado"})
+        
+        return JSONResponse(status_code=200, content={
+            "status": "success",
+            "message": "Otro diagnóstico guardado exitosamente",
+            "paciente_id": paciente_id
+        })
+        
+    except Exception as e:
+        print(f"❌ Error al guardar otro diagnóstico: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+# ============================================================================
+# ENDPOINT: GUARDAR DEFUNCIÓN
+@app.post("/api/paciente/{paciente_id}/defuncion")
+async def guardar_defuncion(paciente_id: str, data: dict):
+    """Registrar la defunción de un paciente"""
+    
+    try:
+        from bson import ObjectId
+        from datetime import datetime
+        
+        if db_manager is None or not db_manager.connected:
+            return JSONResponse(status_code=503, content={"status": "error", "message": "BD no conectada"})
+        
+        # Convertir ID
+        try:
+            oid = ObjectId(paciente_id)
+        except:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "ID inválido"})
+        
+        motivo_defuncion = data.get("motivo", "").strip()
+        if not motivo_defuncion:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "Motivo vacío"})
+        
+        # Actualizar documento
+        resultado = db_manager.collection.update_one(
+            {"_id": oid},
+            {
+                "$set": {
+                    "Estado del paciente": "Defunción",
+                    "motivo_defuncion": motivo_defuncion,
+                    "fecha_defuncion": datetime.now()
+                }
+            }
+        )
+        
+        if resultado.matched_count == 0:
+            return JSONResponse(status_code=404, content={"status": "error", "message": "Paciente no encontrado"})
+        
+        return JSONResponse(status_code=200, content={
+            "status": "success",
+            "message": "Defunción registrada exitosamente",
+            "paciente_id": paciente_id
+        })
+        
+    except Exception as e:
+        print(f"❌ Error al registrar defunción: {e}")
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
 
 
 # ============================================================================

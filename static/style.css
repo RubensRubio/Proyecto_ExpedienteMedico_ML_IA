@@ -520,4 +520,131 @@ footer {
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+/* ESTILOS: MENÚ DE ACCIONES */
+/* ========================================================================== */
+
+.menu-acciones {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    animation: slideIn 0.2s ease-out;
+}
+
+.menu-acciones button:hover {
+    background-color: #f5f5f5 !important;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ESTILOS: MODALES */
+/* ========================================================================== */
+
+.modal {
+    display: flex;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.3s ease-out;
+    align-items: center;
+    justify-content: center;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.5em;
+}
+
+/* AJUSTES TABLA */
+/* ========================================================================== */
+
+.tabla-pacientes {
+    font-size: 0.9em;
+}
+
+.tabla-pacientes thead th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+    white-space: nowrap;
+}
+
+.tabla-pacientes tbody td {
+    border-bottom: 1px solid #eee;
+    padding: 10px 8px;
+}
+
+.tabla-pacientes tbody tr:hover {
+    background-color: #fafafa;
+}
+
+/* Tooltip para Estado de Tratamiento */
+span[title] {
+    border-bottom: 1px dotted #999;
+    cursor: help;
+}
+
+span[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    background-color: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 0.85em;
+    white-space: nowrap;
+    z-index: 1;
+    bottom: 120%;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+}
 }

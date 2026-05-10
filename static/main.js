@@ -295,7 +295,7 @@ function mostrarPacientes(pacientes) {
     if (pacientes.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align: center; color: #999;">
+                <td colspan="8" style="text-align: center; color: #999;">
                     No hay pacientes registrados
                 </td>
             </tr>
@@ -329,70 +329,71 @@ function mostrarPacientes(pacientes) {
               })
             : '-';
         
-        // Determinar qué botón mostrar
-        const tieneTratamiento = !!paciente.fecha_tratamiento;
-        const botonAccion = tieneTratamiento 
-            ? `<button 
-                    class="btn-erm" 
-                    onclick="agregarERM('${paciente.id}')"
+        // Menú contextual con opciones
+        const menuAcciones = `
+            <div style="position: relative; display: inline-block;">
+                <button 
+                    onclick="toggleMenuAcciones(event, '${paciente.id}')"
                     style="
-                        padding: 6px 12px;
-                        background-color: #007bff;
+                        padding: 6px 8px;
+                        background-color: #3498db;
                         color: white;
                         border: none;
                         border-radius: 4px;
                         cursor: pointer;
-                        font-size: 0.9em;
-                        font-weight: 500;
+                        font-size: 1.2em;
                     "
-                    onmouseover="this.style.backgroundColor='#0056b3'"
-                    onmouseout="this.style.backgroundColor='#007bff'"
+                    title="Acciones"
                 >
-                    Ver ERM
-                </button>`
-            : `<button 
-                    class="btn-tratamiento" 
-                    onclick="agregarTratamiento('${paciente.id}')"
-                    style="
-                        padding: 6px 12px;
-                        background-color: #27ae60;
-                        color: white;
-                        border: none;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-size: 0.9em;
-                        font-weight: 500;
-                    "
-                    onmouseover="this.style.backgroundColor='#1e8449'"
-                    onmouseout="this.style.backgroundColor='#27ae60'"
-                >
-                    Agregar Tratamiento
-                </button>`;
+                    ⋮
+                </button>
+                <div id="menu-${paciente.id}" class="menu-acciones" style="display: none; position: absolute; top: 30px; right: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 180px;">
+                    <button onclick="mostrarResultado('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #eee;">📊 Mostrar Resultado</button>
+                    <button onclick="abrirModalOtroDiagnostico('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #eee;">📋 Otro Diagnóstico</button>
+                    <button onclick="abrirModalDefuncion('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer; font-size: 0.9em; color: #c0392b;">⚰️ Defunción</button>
+                </div>
+            </div>
+        `;
 
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td><code style="font-weight: bold;">${paciente.id.substring(0, 12)}...</code></td>
-            <td>${paciente.tipo_leucemia || 'N/A'}</td>
-            <td>
+            <td style="padding: 8px 6px;"><code style="font-weight: bold; font-size: 0.85em;">${paciente.id.substring(0, 12)}...</code></td>
+            <td style="padding: 8px 6px; text-align: center;">${paciente.tipo_leucemia || 'N/A'}</td>
+            <td style="padding: 8px 6px; text-align: center;">
                 <span style="
                     padding: 4px 8px; 
                     border-radius: 4px;
-                    font-size: 0.9em;
+                    font-size: 0.85em;
                     font-weight: 500;
                     ${paciente.estado === 'Tratamiento' ? 'background: #c8e6c9; color: #2e7d32;' : 
                       paciente.estado === 'Defunción' ? 'background: #ffcdd2; color: #c62828;' :
                       paciente.estado === 'Cuidados paliativos' ? 'background: #ffe0b2; color: #e65100;' :
+                      paciente.estado === 'Otro diagnóstico' ? 'background: #d7bde2; color: #6c3483;' :
                       'background: #b3e5fc; color: #01579b;'}
                 ">
                     ${paciente.estado}
                 </span>
             </td>
-            <td>
+            <td style="padding: 8px 6px; text-align: center;">
                 <span style="
                     padding: 4px 8px;
                     border-radius: 4px;
-                    font-size: 0.9em;
+                    font-size: 0.85em;
                     font-weight: 500;
+                    ${paciente.riesgo_calculado === 'Riesgo alto' ? 'background: #ffcdd2; color: #c62828;' :
+                      paciente.riesgo_calculado === 'Riesgo intermedio' ? 'background: #fff3cd; color: #856404;' :
+                      'background: #d4edda; color: #155724;'}
+                ">
+                    ${paciente.riesgo_calculado || '-'}
+                </span>
+            </td>
+            <td style="padding: 8px 6px; text-align: center;">
+                <span title="${paciente.estatus_tratamiento ? 'Tratamiento aplicado y fase' : 'Sin tratamiento'}${paciente.estatus_tratamiento ? ': ' + paciente.estatus_tratamiento : ''}" style="
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 0.85em;
+                    font-weight: 500;
+                    cursor: help;
                     ${paciente.estatus_tratamiento === 'Proceso' ? 'background: #fff3cd; color: #856404;' :
                       paciente.estatus_tratamiento === 'Completado' ? 'background: #d4edda; color: #155724;' :
                       'background: #e2e3e5; color: #383d41;'}
@@ -400,9 +401,9 @@ function mostrarPacientes(pacientes) {
                     ${paciente.estatus_tratamiento || '-'}
                 </span>
             </td>
-            <td>${fechaTratamiento}</td>
-            <td>${fechaFormato}</td>
-            <td>${botonAccion}</td>
+            <td style="padding: 8px 6px; text-align: center; font-size: 0.85em;">${fechaTratamiento}</td>
+            <td style="padding: 8px 6px; text-align: center; font-size: 0.85em;">${fechaFormato}</td>
+            <td style="padding: 8px 6px; text-align: center;">${menuAcciones}</td>
         `;
         tbody.appendChild(row);
     });
@@ -749,6 +750,8 @@ let chatState = {
     conversationActive: false,
     currentFieldIndex: 0,
     extractedData: {},
+    awaitingConfirmation: false,
+    pendingValue: null,
     fields: [
         { field: 'Edad', type: 'number', question: '¿Cuál es la edad del paciente? (entre 0 y 18 años)', validation: (v) => !isNaN(v) && v >= 0 && v <= 18 },
         { field: 'Sexo', type: 'option', question: '¿Cuál es el sexo del paciente? (M para Masculino, F para Femenino)', options: ['M', 'F'], validation: (v) => ['M', 'F'].includes(v.toUpperCase()) },
@@ -834,6 +837,46 @@ async function processUserInput(userInput) {
     
     // Enviar el input del usuario al chat
     addMessage('user', userInput);
+    
+    // Procesar respuesta de confirmación de blastos >= 20%
+    if (chatState.awaitingConfirmation && chatState.pendingValue) {
+        const responseLower = userInput.toLowerCase().trim();
+        
+        if (responseLower === 'sí' || responseLower === 'si') {
+            // Confirmar el valor
+            chatState.extractedData[chatState.pendingValue.field] = chatState.pendingValue.value;
+            addMessage('system', `✅ Confirmado: ${chatState.pendingValue.field} = ${chatState.pendingValue.value}`);
+            
+            // Limpiar estado de confirmación
+            chatState.awaitingConfirmation = false;
+            chatState.pendingValue = null;
+            
+            // Pasar al siguiente campo
+            chatState.currentFieldIndex++;
+            document.getElementById('chat-input').value = '';
+            
+            // Pequeña pausa antes de la siguiente pregunta
+            setTimeout(askNextQuestion, 800);
+            return;
+        } else if (responseLower === 'no') {
+            // Rechazar - pedir que reingrese
+            addMessage('assistant', `Entendido. ${currentField.question}`);
+            
+            // Limpiar estado de confirmación
+            chatState.awaitingConfirmation = false;
+            chatState.pendingValue = null;
+            
+            document.getElementById('chat-input').value = '';
+            document.getElementById('chat-input').focus();
+            return;
+        } else {
+            // Respuesta no válida
+            addMessage('error', `❌ Por favor responde "Sí" o "No"`);
+            document.getElementById('chat-input').value = '';
+            document.getElementById('chat-input').focus();
+            return;
+        }
+    }
     
     // Validar según el tipo de campo
     let isValid = false;
@@ -1178,6 +1221,200 @@ document.getElementById('modal-erm').addEventListener('click', function(e) {
 */
 
 console.log('✅ Interfaz web cargada correctamente');
+
+// ============================================================================
+// FUNCIONES: MENÚ DE ACCIONES Y DIAGNÓSTICOS
+// ============================================================================
+
+// Contador de menús abiertos para cerrar al hacer click fuera
+var pacientesMenuActivos = {};
+
+function toggleMenuAcciones(event, pacienteId) {
+    event.stopPropagation();
+    const menu = document.getElementById(`menu-${pacienteId}`);
+    const isVisible = menu.style.display === 'block';
+    
+    // Cerrar todos los menús abiertos
+    document.querySelectorAll('.menu-acciones').forEach(m => m.style.display = 'none');
+    
+    if (!isVisible) {
+        menu.style.display = 'block';
+        pacientesMenuActivos[pacienteId] = true;
+    } else {
+        menu.style.display = 'none';
+        delete pacientesMenuActivos[pacienteId];
+    }
+}
+
+function cerrarMenuAcciones(pacienteId) {
+    const menu = document.getElementById(`menu-${pacienteId}`);
+    if (menu) {
+        menu.style.display = 'none';
+    }
+    delete pacientesMenuActivos[pacienteId];
+}
+
+// Cerrar menús al hacer click fuera
+document.addEventListener('click', function() {
+    document.querySelectorAll('.menu-acciones').forEach(m => m.style.display = 'none');
+    pacientesMenuActivos = {};
+});
+
+// Mostrar resultado/diagnóstico del paciente
+async function mostrarResultado(pacienteId) {
+    try {
+        const response = await fetch(`${API_BASE}/api/paciente/${pacienteId}/respuesta-natural`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            const contenido = document.getElementById('modal-resultado-contenido');
+            let html = `<strong>📋 Estado:</strong> ${data.estado}<br><br>`;
+            
+            if (data.riesgo_calculado && data.riesgo_calculado !== '-') {
+                html += `<strong>⚠️ Riesgo Calculado:</strong> <span style="color: ${
+                    data.riesgo_calculado === 'Riesgo alto' ? '#c62828' :
+                    data.riesgo_calculado === 'Riesgo intermedio' ? '#856404' :
+                    '#155724'
+                }">${data.riesgo_calculado}</span><br><br>`;
+            }
+            
+            if (data.respuesta_natural && data.respuesta_natural !== 'No disponible') {
+                html += `<strong>📊 Diagnóstico:</strong><br><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word;">${data.respuesta_natural}</pre>`;
+            } else {
+                html += `<p style="color: #999;">No hay diagnóstico disponible aún.</p>`;
+            }
+            
+            contenido.innerHTML = html;
+            document.getElementById('modal-resultado').style.display = 'flex';
+        } else {
+            alert('❌ Error: ' + (data.message || 'No se pudo obtener el resultado'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error al obtener el resultado: ' + error.message);
+    }
+}
+
+function cerrarModalResultado() {
+    document.getElementById('modal-resultado').style.display = 'none';
+}
+
+// Modales para diagnósticos
+var pacienteIdActual = null;
+
+function abrirModalOtroDiagnostico(pacienteId) {
+    pacienteIdActual = pacienteId;
+    document.getElementById('otro-diagnostico-input').value = '';
+    document.getElementById('modal-otro-diagnostico').style.display = 'flex';
+    document.getElementById('otro-diagnostico-input').focus();
+}
+
+function cerrarModalOtroDiagnostico() {
+    document.getElementById('modal-otro-diagnostico').style.display = 'none';
+    pacienteIdActual = null;
+}
+
+async function guardarOtroDiagnostico() {
+    const diagnostico = document.getElementById('otro-diagnostico-input').value.trim();
+    
+    if (!diagnostico) {
+        alert('⚠️ Por favor escribe el diagnóstico');
+        return;
+    }
+    
+    if (!pacienteIdActual) {
+        alert('❌ Error: Paciente no identificado');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/paciente/${pacienteIdActual}/otro-diagnostico`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ diagnostico })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            alert('✅ Diagnóstico guardado exitosamente');
+            cerrarModalOtroDiagnostico();
+            cargarPacientes(); // Recargar tabla
+        } else {
+            alert('❌ Error: ' + (data.message || 'No se pudo guardar'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error de conexión: ' + error.message);
+    }
+}
+
+function abrirModalDefuncion(pacienteId) {
+    pacienteIdActual = pacienteId;
+    document.getElementById('defuncion-motivo-input').value = '';
+    document.getElementById('modal-defuncion').style.display = 'flex';
+    document.getElementById('defuncion-motivo-input').focus();
+}
+
+function cerrarModalDefuncion() {
+    document.getElementById('modal-defuncion').style.display = 'none';
+    pacienteIdActual = null;
+}
+
+async function guardarDefuncion() {
+    const motivo = document.getElementById('defuncion-motivo-input').value.trim();
+    
+    if (!motivo) {
+        alert('⚠️ Por favor especifica el motivo');
+        return;
+    }
+    
+    if (!pacienteIdActual) {
+        alert('❌ Error: Paciente no identificado');
+        return;
+    }
+    
+    if (!confirm('⚠️ ¿Confirmás que deseas registrar la defunción de este paciente?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/paciente/${pacienteIdActual}/defuncion`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ motivo })
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            alert('✅ Defunción registrada exitosamente');
+            cerrarModalDefuncion();
+            cargarPacientes(); // Recargar tabla
+        } else {
+            alert('❌ Error: ' + (data.message || 'No se pudo registrar'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ Error de conexión: ' + error.message);
+    }
+}
+
+// Cerrar modales al hacer click fuera
+document.addEventListener('DOMContentLoaded', function() {
+    const modales = ['modal-resultado', 'modal-otro-diagnostico', 'modal-defuncion'];
+    
+    modales.forEach(modalId => {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.style.display = 'none';
+                }
+            });
+        }
+    });
+});
 
 // Cargar pacientes al abrir la aplicación
 document.addEventListener('DOMContentLoaded', () => cargarPacientes());
