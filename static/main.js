@@ -750,15 +750,16 @@ let chatState = {
     currentFieldIndex: 0,
     extractedData: {},
     fields: [
-        { field: 'Edad', type: 'number', question: '¿Cuál es la edad del paciente? (entre 0 y 120 años)', validation: (v) => !isNaN(v) && v >= 0 && v <= 120 },
+        { field: 'Edad', type: 'number', question: '¿Cuál es la edad del paciente? (entre 0 y 18 años)', validation: (v) => !isNaN(v) && v >= 0 && v <= 18 },
         { field: 'Sexo', type: 'option', question: '¿Cuál es el sexo del paciente? (M para Masculino, F para Femenino)', options: ['M', 'F'], validation: (v) => ['M', 'F'].includes(v.toUpperCase()) },
         { field: 'Número de Leucocitos al inicio', type: 'number', question: '¿Cuál es el número de leucocitos al inicio?', validation: (v) => !isNaN(v) && v > 0 },
+        { field: 'Número de blastos', type: 'number', question: '¿Cuál es el porcentaje de blastos? (0-100)\n⚠️ DATO SENSIBLE: Este es un valor crítico. Por favor verifica que sea correcto.', validation: (v) => !isNaN(v) && v >= 0 && v <= 100, requiresConfirmation: true },
         { field: 'Tipo leucemia', type: 'option', question: '¿Cuál es el tipo de leucemia? (B, T o M)', options: ['B', 'T', 'M'], validation: (v) => ['B', 'T', 'M'].includes(v.toUpperCase()) },
-        { field: 'Número de blastos', type: 'number', question: '¿Cuál es el porcentaje de blastos? (0-100)', validation: (v) => !isNaN(v) && v >= 0 && v <= 100 },
-        { field: 'Clasificación cariotipo', type: 'optional', question: '¿Cuál es la clasificación cariotipo? (Di "no tengo" o "no aplica" si no tienes esta información)', validation: (v) => true },
-        { field: 'Biología molecular', type: 'optional', question: '¿Cuál es la biología molecular? (Puedo decir "no tengo" o "no aplica" si no tienes esta información)', validation: (v) => true },
+        { field: 'Clasificación cariotipo', type: 'string', question: '¿Cuál es la clasificación cariotipo? (Puedes escribir el valor, "No detectado" o "No aplica")', validation: (v) => true },
+        { field: 'Biología molecular', type: 'string', question: '¿Cuál es la biología molecular? (Puedes escribir el valor, "No detectado" o "No aplica")', validation: (v) => true },
         { field: 'GATE Inmunofenotipo', type: 'number', question: '¿Cuál es el GATE Inmunofenotipo?', validation: (v) => !isNaN(v) && v >= 0 },
-        { field: 'Marcadores aberrantes', type: 'optional', question: '¿Hay marcadores aberrantes? (Puedes decir "no tengo", "no aplica" o "negativos" si no hay)', validation: (v) => true }
+        { field: 'Inmunofenotipo marcadores', type: 'isoform_markers', question: '¿Cuál es el Inmunofenotipo marcadores? (máximo 500 caracteres, este campo es obligatorio)', validation: (v) => v && v.length > 0 && v.length <= 500 },
+        { field: 'Marcadores aberrantes', type: 'aberrant_markers', question: '¿Hay marcadores aberrantes? (Escribe el valor detectado o "No detectado")', validation: (v) => true }
     ]
 };
 
@@ -839,11 +840,72 @@ async function processUserInput(userInput) {
     let extractedValue = processedValue;
     
     try {
-        // Campos opcionales - detectar "no tengo" o "no aplica"
-        if (currentField.type === 'optional') {
+        // Campos de tipo string (cariotipo, biología molecular, etc.)
+        if (currentField.type === 'string') {
             const inputLower = userInput.toLowerCase();
             
-            // Si el usuario dice que no tiene o no aplica, usar eso
+            // Aceptar "No detectado" o "No aplica"
+            if (inputLower.includes('no detectado') || inputLower === 'no detectado') {
+                extractedValue = 'No detectado';
+                isValid = true;
+                addMessage('system', `✅ Entendido: ${currentField.field} = No detectado`);
+            } else if (inputLower.includes('no aplica') || inputLower === 'no aplica') {
+                extractedValue = 'No aplica';
+                isValid = true;
+                addMessage('system', `✅ Entendido: ${currentField.field} = No aplica`);
+            } else if (userInput.trim() !== '') {
+                // Aceptar cualquier otro valor no vacío
+                extractedValue = userInput.trim();
+                isValid = true;
+                addMessage('system', `✅ Entendido: ${currentField.field} = ${extractedValue}`);
+            } else {
+                addMessage('error', `❌ Este campo es obligatorio. ${currentField.question}`);
+                document.getElementById('chat-input').value = '';
+                document.getElementById('chat-input').focus();
+                return;
+            }
+        } 
+        // Campo de Inmunofenotipo marcadores (string obligatorio, máximo 500 caracteres)
+        else if (currentField.type === 'isoform_markers') {
+            const inputTrimmed = userInput.trim();
+            if (inputTrimmed === '') {
+                addMessage('error', `❌ Este campo es obligatorio. ${currentField.question}`);
+                document.getElementById('chat-input').value = '';
+                document.getElementById('chat-input').focus();
+                return;
+            } else if (inputTrimmed.length > 500) {
+                addMessage('error', `❌ El valor es muy largo (máximo 500 caracteres). Intenta de nuevo.`);
+                document.getElementById('chat-input').value = '';
+                document.getElementById('chat-input').focus();
+                return;
+            } else {
+                extractedValue = inputTrimmed;
+                isValid = true;
+                addMessage('system', `✅ Entendido: ${currentField.field} = "${extractedValue}"`);
+            }
+        }
+        // Campo de Marcadores aberrantes (solo valor capturado o "No detectado")
+        else if (currentField.type === 'aberrant_markers') {
+            const inputLower = userInput.toLowerCase();
+            if (inputLower === 'no detectado' || inputLower.includes('no detectado')) {
+                extractedValue = 'No detectado';
+                isValid = true;
+                addMessage('system', `✅ Entendido: ${currentField.field} = No detectado`);
+            } else if (userInput.trim() !== '') {
+                extractedValue = userInput.trim();
+                isValid = true;
+                addMessage('system', `✅ Entendido: ${currentField.field} = "${extractedValue}"`);
+            } else {
+                addMessage('error', `❌ Por favor escribe el valor o "No detectado".`);
+                document.getElementById('chat-input').value = '';
+                document.getElementById('chat-input').focus();
+                return;
+            }
+        }
+        // Campos opcionales antiguos
+        else if (currentField.type === 'optional') {
+            const inputLower = userInput.toLowerCase();
+            
             if (inputLower.includes('no tengo') || inputLower === 'no tengo') {
                 extractedValue = 'No tengo';
                 isValid = true;
@@ -853,19 +915,18 @@ async function processUserInput(userInput) {
                 isValid = true;
                 addMessage('system', `✅ Entendido: ${currentField.field} = No aplica`);
             } else if (inputLower === '' || userInput === '') {
-                // Campo vacío en opcional - pedir confirmación
                 addMessage('assistant', `Veo que no escribiste nada. ¿Quieres poner "No tengo" o "No aplica"? Escribe cualquiera de esas dos opciones o proporciona el valor.`);
                 document.getElementById('chat-input').value = '';
                 document.getElementById('chat-input').focus();
                 return;
             } else {
-                // Usuario escribió algo diferente
-                extractedValue = userInput.capitalize ? userInput.charAt(0).toUpperCase() + userInput.slice(1) : userInput;
+                extractedValue = userInput.charAt(0).toUpperCase() + userInput.slice(1);
                 isValid = true;
                 addMessage('system', `✅ Entendido: ${currentField.field} = ${extractedValue}`);
             }
-        } else {
-            // Para campos no opcionales, usar el endpoint de extracción
+        } 
+        // Para otros tipos, usar el endpoint de extracción
+        else {
             const response = await fetch(`${API_BASE}/api/chat/extract`, {
                 method: 'POST',
                 headers: {
@@ -885,6 +946,18 @@ async function processUserInput(userInput) {
                 isValid = currentField.validation(extractedValue);
                 
                 if (isValid) {
+                    // Validación especial para blastos >= 20%
+                    if (currentField.field === 'Número de blastos' && currentField.requiresConfirmation && extractedValue >= 20) {
+                        addMessage('assistant', `⚠️ ADVERTENCIA SENSIBLE:\nEl porcentaje de blastos que ingresaste es ${extractedValue}%, lo que es significativo.\n\n¿Estás completamente seguro de que este valor es correcto? (Escribe "Sí" para confirmar o "No" para cambiar)`);
+                        
+                        // Guardar temporalmente pero pedir confirmación
+                        chatState.pendingValue = { field: currentField.field, value: extractedValue };
+                        chatState.awaitingConfirmation = true;
+                        document.getElementById('chat-input').value = '';
+                        document.getElementById('chat-input').focus();
+                        return;
+                    }
+                    
                     addMessage('system', `✅ Entendido: ${currentField.field} = ${extractedValue}`);
                 } else {
                     addMessage('error', `❌ Valor no válido. ${currentField.question}`);
@@ -933,6 +1006,7 @@ async function finalizeChat() {
             'Clasificación cariotipo': String(chatState.extractedData['Clasificación cariotipo'] || 'No detectado'),
             'Biología molecular': String(chatState.extractedData['Biología molecular'] || ''),
             'GATE Inmunofenotipo': parseFloat(chatState.extractedData['GATE Inmunofenotipo']),
+            'Inmunofenotipo marcadores': String(chatState.extractedData['Inmunofenotipo marcadores'] || ''),
             'Marcadores aberrantes': String(chatState.extractedData['Marcadores aberrantes'] || '')
         };
         
@@ -957,9 +1031,16 @@ async function finalizeChat() {
                 addMessage('system', idMsg);
             }
             
-            // Mostrar la respuesta natural de la predicción en el chat
+            // Mostrar la respuesta natural de la predicción en el chat con riesgo calculado
             if (data.prediccion_natural) {
-                addMessage('assistant', `📊 Resultado del análisis:\n\n${data.prediccion_natural}`);
+                let diagnosticoMsg = `📊 Resultado del análisis:\n\n${data.prediccion_natural}`;
+                
+                // Agregar el riesgo calculado si está disponible
+                if (data.riesgo_calculado) {
+                    diagnosticoMsg += `\n\n⚠️ **Riesgo Calculado:** ${data.riesgo_calculado}`;
+                }
+                
+                addMessage('assistant', diagnosticoMsg);
             } else {
                 addMessage('assistant', '✅ El modelo está procesando... (Se necesitan más datos para entrenar el modelo completamente)');
             }

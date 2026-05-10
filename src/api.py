@@ -256,9 +256,31 @@ async def crear_paciente(data : dict):
                 content={"status": "error", "message": f"Error en conversión de datos: {str(e)}"}
             )
         
+        # Validar que la edad esté en rango permitido (0-18 años)
+        edad = data['Edad']
+        if edad < 0 or edad > 18:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Error: La edad debe estar entre 0 y 18 años"}
+            )
+        
+        # Validar que el campo "Inmunofenotipo marcadores" no esté vacío
+        inmunofenotipo_marcadores = data.get('Inmunofenotipo marcadores', '').strip()
+        if not inmunofenotipo_marcadores:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Error: El campo 'Inmunofenotipo marcadores' es obligatorio"}
+            )
+        
+        # Validar que no exceda los 500 caracteres
+        if len(inmunofenotipo_marcadores) > 500:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Error: El campo 'Inmunofenotipo marcadores' no puede exceder 500 caracteres"}
+            )
+        
         # Calcular el riesgo automáticamente
         try:
-            edad = data['Edad']
             leucocitos = data['Número de Leucocitos al inicio']
             
             riesgo_edad, riesgo_leucos, riesgo_final = clasificar_paciente(edad, leucocitos)
