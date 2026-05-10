@@ -1135,8 +1135,6 @@ async def capturar_erm(paciente_id: str, datos: dict):
             "respuesta_natural": respuesta_natural,
             "fecha_creacion": datetime.now()
         }
-            "fecha_creacion": datetime.now()
-        }
         
         # Guardar en colección capturas_erm
         resultado = db.capturas_erm.insert_one(documento_erm)
