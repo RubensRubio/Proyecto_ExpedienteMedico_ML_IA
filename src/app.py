@@ -1,13 +1,13 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from data_loader import load_excel, ensure_columns
-from queries import distribucion_por_diagnostico, edadPromedio_por_diagnostico
-from similarity import busqueda_exacta, busqueda_similar
-from ml_pipeline import entrenarmodelo_y_evaluar, guardar_modelo, cargar_modelo, predecir_paciente, FEATURE_COLUMNS, TARGET_COLUMN
-from risk_classifier import clasificar_pacientes, mostrar_resumen_clasificacion, preparar_pacientes_para_bd
-from database import DatabaseManager
-from ml_model_pacientes import ModeloPredictorEstadoPaciente
+from .data_loader import load_excel, ensure_columns
+from .queries import distribucion_por_diagnostico, edadPromedio_por_diagnostico
+from .similarity import busqueda_exacta, busqueda_similar
+from .ml_pipeline import entrenarmodelo_y_evaluar, guardar_modelo, cargar_modelo, predecir_paciente, FEATURE_COLUMNS, TARGET_COLUMN
+from .risk_classifier import clasificar_pacientes, mostrar_resumen_clasificacion, preparar_pacientes_para_bd
+from .database import DatabaseManager
+from .ml_model_pacientes import ModeloPredictorEstadoPaciente
 
 #Carga de variables de entorno
 env_path = Path(__file__).parent.parent / ".env"

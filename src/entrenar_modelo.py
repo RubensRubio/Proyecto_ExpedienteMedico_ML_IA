@@ -1,8 +1,8 @@
 import sys
 sys.path.insert(0, 'src')
 
-from database import DatabaseManager
-from ml_model_pacientes import ModeloPredictorEstadoPaciente
+from .database import DatabaseManager
+from .ml_model_pacientes import ModeloPredictorEstadoPaciente
 import os
 from dotenv import load_dotenv
 from pathlib import Path

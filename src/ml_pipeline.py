@@ -8,7 +8,7 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, classification_report, confusion_matrix
 import joblib
-from config import FEATURE_COLUMNS, TARGET_COLUMN, NUMERIC_FEATURES, CATEGORICAL_FEATURES, MODEL_PATH
+from .config import FEATURE_COLUMNS, TARGET_COLUMN, NUMERIC_FEATURES, CATEGORICAL_FEATURES, MODEL_PATH
 
 
 def preparar_datos_para_modelo(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:

@@ -1,6 +1,6 @@
 import pandas as pd
-from ml_model_pacientes import ModeloPredictorEstadoPaciente
-from database import DatabaseManager
+from .ml_model_pacientes import ModeloPredictorEstadoPaciente
+from .database import DatabaseManager
 import os
 
 class PredictorHelper:

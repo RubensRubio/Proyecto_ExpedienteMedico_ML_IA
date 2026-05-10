@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Body
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -1008,6 +1008,289 @@ async def guardar_plan_tratamiento(data: dict):
         return JSONResponse(
             status_code=500,
             content={"status": "error", "message": f"Error al guardar plan de tratamiento: {str(e)}"}
+        )
+
+# ============================================================================
+# ENDPOINTS PARA CAPTURA DE ERM
+# ============================================================================
+
+@app.post("/api/paciente/{paciente_id}/captura-erm")
+async def capturar_erm(paciente_id: str, datos: dict):
+    """
+    Captura datos de ERM del paciente
+    
+    Datos requeridos:
+    - fecha (dd/mm/yyyy)
+    - resultado_erm (0-100, con máximo 2 decimales)
+    - numero_leucos (numérico)
+    - numero_blastos (0-100)
+    - ldh (0-1000)
+    - esquema_rescate (si/no)
+    - tipo_esquema_rescate (IDA/FLAG o IDA/MITO, si esquema_rescate = si)
+    - marcadores (string)
+    - marcadores_aberrante (string)
+    """
+    from bson import ObjectId
+    from datetime import datetime
+    global db_manager
+    
+    try:
+        # Conectar si es necesario
+        if db_manager is None or not db_manager.connected:
+            db_manager = DatabaseManager()
+            uri = os.getenv("MONGODB_URI")
+            if uri:
+                db_manager.uri = uri
+            if not db_manager.conectar("modelo_pacientes", "coleccion1"):
+                return JSONResponse(
+                    status_code=500,
+                    content={"status": "error", "message": "Error al conectar a la base de datos"}
+                )
+        
+        # Validar datos
+        try:
+            oid = ObjectId(paciente_id)
+        except:
+            oid = paciente_id
+        
+        # Obtener el paciente para verificar que existe
+        db = db_manager.db
+        paciente = paciente = db.coleccion1.find_one({"_id": oid if isinstance(oid, ObjectId) else paciente_id})
+        
+        if not paciente:
+            # Intentar con string
+            paciente = db.coleccion1.find_one({"_id": paciente_id})
+        
+        if not paciente:
+            return JSONResponse(
+                status_code=404,
+                content={"status": "error", "message": "Paciente no encontrado"}
+            )
+        
+        # Validar campos requeridos
+        campos_requeridos = ['fecha', 'resultado_erm', 'numero_leucos', 'numero_blastos', 'ldh', 'esquema_rescate', 'marcadores', 'marcadores_aberrante']
+        for campo in campos_requeridos:
+            if campo not in datos:
+                return JSONResponse(
+                    status_code=400,
+                    content={"status": "error", "message": f"Campo requerido faltante: {campo}"}
+                )
+        
+        # Validaciones específicas
+        resultado_erm = float(datos.get('resultado_erm', 0))
+        if resultado_erm < 0 or resultado_erm > 100:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Resultado ERM debe estar entre 0 y 100"}
+            )
+        
+        numero_blastos = float(datos.get('numero_blastos', 0))
+        if numero_blastos < 0 or numero_blastos > 100:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Número de blastos debe estar entre 0 y 100"}
+            )
+        
+        ldh = float(datos.get('ldh', 0))
+        if ldh < 0 or ldh > 1000:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "LDH debe estar entre 0 y 1000"}
+            )
+        
+        numero_leucos = float(datos.get('numero_leucos', 0))
+        if numero_leucos < 0:
+            return JSONResponse(
+                status_code=400,
+                content={"status": "error", "message": "Número de leucos debe ser positivo"}
+            )
+        
+        # Generar respuesta en lenguaje natural
+        if resultado_erm >= 0.01:
+            respuesta_natural = f"🔴 **ERM DETECTABLE ({resultado_erm}%)**\nSe sugiere persistencia importante de células leucémicas residuales. Esto se asocia con mayor riesgo de recaída. Se requiere vigilancia intensiva y posible intensificación del tratamiento."
+        else:
+            respuesta_natural = f"🟢 **ERM NO DETECTABLE (<0.01%)**\nNo se detectan células leucémicas residuales. Se sugiere continuar con el tratamiento actual según protocolo establecido."
+        
+        # Detalles adicionales
+        detalles = f"\n\nDetalles del análisis:\n- Leucos: {numero_leucos}\n- Blastos: {numero_blastos}%\n- LDH: {ldh}"
+        if datos.get('esquema_rescate') == 'si':
+            detalles += f"\n- Esquema de rescate: {datos.get('tipo_esquema_rescate', '')}"
+        
+        detalles += f"\n- Marcadores: {datos.get('marcadores', 'N/A')}\n- Marcadores aberrantes: {datos.get('marcadores_aberrante', 'N/A')}"
+        
+        respuesta_natural += detalles
+        
+        # Preparar documento ERM
+        documento_erm = {
+            "paciente_id": paciente_id,  # Guardar como STRING siempre
+            "fecha": datos.get('fecha'),
+            "resultado_erm": resultado_erm,
+            "numero_leucos": numero_leucos,
+            "numero_blastos": numero_blastos,
+            "ldh": ldh,
+            "esquema_rescate": datos.get('esquema_rescate'),
+            "tipo_esquema_rescate": datos.get('tipo_esquema_rescate', '') if datos.get('esquema_rescate') == 'si' else None,
+            "marcadores": datos.get('marcadores'),
+            "marcadores_aberrante": datos.get('marcadores_aberrante'),
+            "respuesta_natural": respuesta_natural,
+            "fecha_creacion": datetime.now()
+        }
+            "fecha_creacion": datetime.now()
+        }
+        
+        # Guardar en colección capturas_erm
+        resultado = db.capturas_erm.insert_one(documento_erm)
+        
+        print(f"\n✅ ERM guardada exitosamente:")
+        print(f"   paciente_id guardado: {documento_erm['paciente_id']} (tipo: {type(documento_erm['paciente_id']).__name__})")
+        print(f"   ID del documento: {resultado.inserted_id}")
+        
+        if resultado.inserted_id:
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": "success",
+                    "message": "ERM capturada exitosamente",
+                    "paciente_id": str(paciente_id),
+                    "resultado_erm": resultado_erm,
+                    "respuesta_natural": respuesta_natural
+                }
+            )
+        else:
+            return JSONResponse(
+                status_code=500,
+                content={"status": "error", "message": "Error al guardar ERM"}
+            )
+    
+    except Exception as e:
+        print(f"Error al capturar ERM: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Error al capturar ERM: {str(e)}"}
+        )
+
+@app.get("/api/paciente/{paciente_id}/contador-erm")
+async def obtener_contador_erm(paciente_id: str):
+    """
+    Obtiene el número de ERMs capturadas para un paciente
+    """
+    from bson import ObjectId
+    global db_manager
+    try:
+        # Conectar si es necesario
+        if db_manager is None or not db_manager.connected:
+            db_manager = DatabaseManager()
+            uri = os.getenv("MONGODB_URI")
+            if uri:
+                db_manager.uri = uri
+            if not db_manager.conectar("modelo_pacientes", "coleccion1"):
+                return JSONResponse(
+                    status_code=500,
+                    content={"status": "error", "message": "Error al conectar a la base de datos"}
+                )
+        
+        db = db_manager.db
+        
+        contador = 0
+        
+        # Búsqueda 1: Como STRING
+        contador_string = db.capturas_erm.count_documents({"paciente_id": paciente_id})
+        print(f"✅ Búsqueda como STRING '{paciente_id}': {contador_string} registros")
+        
+        # Búsqueda 2: Como ObjectId (para registros antiguos)
+        try:
+            oid = ObjectId(paciente_id)
+            contador_oid = db.capturas_erm.count_documents({"paciente_id": oid})
+            print(f"✅ Búsqueda como ObjectId {oid}: {contador_oid} registros")
+            contador = max(contador_string, contador_oid)  # Tomar el máximo (no sumar, para evitar duplicados)
+        except Exception as e:
+            print(f"⚠️ No se pudo convertir a ObjectId: {e}")
+            contador = contador_string
+        
+        print(f"📊 Total final: {contador} ERMs para {paciente_id}")
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "success",
+                "paciente_id": str(paciente_id),
+                "contador_erm": contador,
+                "maximo_erm": 3
+            }
+        )
+    
+    except Exception as e:
+        print(f"❌ Error al obtener contador ERM: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Error: {str(e)}"}
+        )
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Error al obtener contador ERM: {str(e)}"}
+        )
+
+@app.get("/api/paciente/{paciente_id}/historial-erm")
+async def obtener_historial_erm(paciente_id: str):
+    """
+    Obtiene el historial de ERMs capturadas para un paciente
+    """
+    global db_manager
+    try:
+        # Conectar si es necesario
+        if db_manager is None or not db_manager.connected:
+            db_manager = DatabaseManager()
+            uri = os.getenv("MONGODB_URI")
+            if uri:
+                db_manager.uri = uri
+            if not db_manager.conectar("modelo_pacientes", "coleccion1"):
+                return JSONResponse(
+                    status_code=500,
+                    content={"status": "error", "message": "Error al conectar a la base de datos"}
+                )
+        
+        # Convertir a ObjectId si es posible
+        try:
+            oid = ObjectId(paciente_id)
+        except:
+            oid = paciente_id
+        
+        db = db_manager.db
+        
+        # Obtener ERMs ordenadas por fecha de creación descendente
+        historial = list(db.capturas_erm.find(
+            {"paciente_id": oid},
+            {"_id": 0}
+        ).sort("fecha_creacion", -1).limit(3))
+        
+        # Si no encuentra resultados, intentar con string
+        if not historial:
+            historial = list(db.capturas_erm.find(
+                {"paciente_id": paciente_id},
+                {"_id": 0}
+            ).sort("fecha_creacion", -1).limit(3))
+        
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "success",
+                "paciente_id": str(paciente_id),
+                "historial_erm": historial,
+                "total": len(historial)
+            }
+        )
+    
+    except Exception as e:
+        print(f"Error al obtener historial ERM: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "message": f"Error al obtener historial ERM: {str(e)}"}
         )
         
         

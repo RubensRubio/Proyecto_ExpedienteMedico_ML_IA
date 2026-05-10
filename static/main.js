@@ -434,9 +434,25 @@ function mostrarPacientes(pacientes) {
             </td>
             <td style="padding: 14px 10px; text-align: center; font-size: 1em;">${fechaTratamiento}</td>
             <td style="padding: 14px 10px; text-align: center; font-size: 1em;">${fechaFormato}</td>
+            <td style="padding: 14px 10px; text-align: center;">
+                <span class="erm-contador" style="
+                    padding: 6px 10px;
+                    border-radius: 4px;
+                    font-size: 0.95em;
+                    font-weight: 600;
+                    display: inline-block;
+                    background: #e3f2fd;
+                    color: #1565c0;
+                ">
+                    <span class="erm-count">0</span>/3
+                </span>
+            </td>
             <td style="padding: 14px 10px; text-align: center;">${menuAcciones}</td>
         `;
         tbody.appendChild(row);
+        
+        // Cargar contador de ERM
+        cargarContadorERMdelPaciente(paciente.id, row);
         
         // Agregar event listeners para el tooltip personalizado de tratamiento
         const treatmentCell = row.querySelector('.treatment-status-cell');
@@ -860,6 +876,29 @@ function initializeChat() {
 }
 
 function askNextQuestion() {
+    // Saltar campos condicionales que no aplican
+    let field = null;
+    while (chatState.currentFieldIndex < chatState.fields.length) {
+        field = chatState.fields[chatState.currentFieldIndex];
+        
+        // Verificar si es condicional
+        if (field.conditional) {
+            const conditionFieldValue = chatState.extractedData[field.conditionField];
+            const conditionMet = conditionFieldValue && (
+                field.conditionValue.toLowerCase() === 'sí' || field.conditionValue.toLowerCase() === 'si' 
+                    ? ['sí', 'si'].includes(conditionFieldValue.toLowerCase())
+                    : conditionFieldValue.toLowerCase() === field.conditionValue.toLowerCase()
+            );
+            
+            if (!conditionMet) {
+                // Saltar este campo
+                chatState.currentFieldIndex++;
+                continue;
+            }
+        }
+        break;
+    }
+    
     if (chatState.currentFieldIndex >= chatState.fields.length) {
         finalizeChat();
         return;
@@ -993,6 +1032,43 @@ async function processUserInput(userInput) {
                 addMessage('system', `✅ Entendido: ${currentField.field} = "${extractedValue}"`);
             }
         }
+        // Campo de Marcadores (obligatorio, tipo string)
+        else if (currentField.type === 'markers') {
+            const inputTrimmed = userInput.trim();
+            if (inputTrimmed === '') {
+                addMessage('error', `❌ Este campo es obligatorio. Por favor describe los marcadores detectados.`);
+                document.getElementById('chat-input').value = '';
+                document.getElementById('chat-input').focus();
+                return;
+            } else if (inputTrimmed.length > 500) {
+                addMessage('error', `❌ El valor es muy largo (máximo 500 caracteres). Intenta de nuevo.`);
+                document.getElementById('chat-input').value = '';
+                document.getElementById('chat-input').focus();
+                return;
+            } else {
+                extractedValue = inputTrimmed;
+                isValid = true;
+                addMessage('system', `✅ Entendido: ${currentField.field} = "${extractedValue}"`);
+            }
+        }
+        // Campo de Marcadores aberrantes con opciones limitadas
+        else if (currentField.type === 'aberrant_markers_limited') {
+            const inputLower = userInput.toLowerCase();
+            if (inputLower.includes('tengo') || inputLower.includes('los capturo')) {
+                extractedValue = 'Tengo y los capturo';
+                isValid = true;
+                addMessage('system', `✅ Entendido: ${currentField.field} = Tengo y los capturo`);
+            } else if (inputLower.includes('no detectado')) {
+                extractedValue = 'No detectado';
+                isValid = true;
+                addMessage('system', `✅ Entendido: ${currentField.field} = No detectado`);
+            } else {
+                addMessage('error', `❌ Por favor selecciona una opción: "Tengo y los capturo" o "No detectado".`);
+                document.getElementById('chat-input').value = '';
+                document.getElementById('chat-input').focus();
+                return;
+            }
+        }
         // Campo de Marcadores aberrantes (solo valor capturado o "No detectado")
         else if (currentField.type === 'aberrant_markers') {
             const inputLower = userInput.toLowerCase();
@@ -1033,7 +1109,7 @@ async function processUserInput(userInput) {
                 isValid = true;
                 addMessage('system', `✅ Entendido: ${currentField.field} = ${extractedValue}`);
             }
-        } 
+        }
         // Para otros tipos, usar el endpoint de extracción
         else {
             const response = await fetch(`${API_BASE}/api/chat/extract`, {
@@ -1538,14 +1614,92 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Cargar pacientes al abrir la aplicación
+// Cargar contador de ERM para un paciente específico
+async function cargarContadorERMdelPaciente(pacienteId, row) {
+    try {
+        const response = await fetch(`${API_BASE}/api/paciente/${pacienteId}/contador-erm`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            const ermCountCell = row.querySelector('span.erm-count');
+            if (ermCountCell) {
+                ermCountCell.textContent = data.contador_erm;
+                console.log(`✅ Contador ERM cargado: ${data.contador_erm} para paciente ${pacienteId}`);
+            } else {
+                console.warn(`⚠️ No se encontró span.erm-count para paciente ${pacienteId}`);
+            }
+        } else {
+            console.warn(`⚠️ Error cargando contador ERM: ${data.message}`);
+        }
+    } catch (error) {
+        console.error('Error cargando contador ERM:', error);
+    }
+}
+
 // ============================================================================
 // FUNCIONES PARA MODAL ERM
 // ============================================================================
 
 let pacienteERMActual = null;
+let ermDatos = {};
+let ermPasoActual = 0;
+
+const ermPreguntas = [
+    { paso: 0, pregunta: '¿Cuál es la fecha en la que se realizó la ERM? (formato: dd/mm/yyyy)', campo: 'fecha', tipo: 'fecha' },
+    { paso: 1, pregunta: '¿Cuál fue el resultado de la ERM en porcentaje? (0-100, máximo 2 decimales)', campo: 'resultado_erm', tipo: 'porcentaje' },
+    { paso: 2, pregunta: '¿Cuál es el número de leucos?', campo: 'numero_leucos', tipo: 'numero' },
+    { paso: 3, pregunta: '¿Cuál es el número de blastos? (0-100)', campo: 'numero_blastos', tipo: 'numero' },
+    { paso: 4, pregunta: '¿Cuál es el valor de LDH? (0-1000)', campo: 'ldh', tipo: 'numero' },
+    { paso: 5, pregunta: '¿Se le aplicó esquema de rescate? (escribe: sí o no)', campo: 'esquema_rescate', tipo: 'texto' },
+    // El paso 6 se agregará dinámicamente si esquema_rescate = 'sí'
+    { paso: 7, pregunta: '¿Cuáles son los marcadores?', campo: 'marcadores', tipo: 'texto' },
+    { paso: 8, pregunta: '¿Cuáles son los marcadores aberrantes?', campo: 'marcadores_aberrante', tipo: 'texto' }
+];
+
+function validarRespuestaBLAST(valor, tipo) {
+    switch(tipo) {
+        case 'fecha':
+            // Validar formato dd/mm/yyyy
+            const regexFecha = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            if (!regexFecha.test(valor)) {
+                return { valido: false, mensaje: '❌ Formato inválido. Por favor usa dd/mm/yyyy (ejemplo: 15/05/2026)' };
+            }
+            return { valido: true };
+        
+        case 'porcentaje':
+            const porcentaje = parseFloat(valor);
+            if (isNaN(porcentaje) || porcentaje < 0 || porcentaje > 100) {
+                return { valido: false, mensaje: '❌ El valor debe estar entre 0 y 100' };
+            }
+            // Validar máximo 2 decimales
+            if (!/^\d+(\.\d{1,2})?$/.test(valor)) {
+                return { valido: false, mensaje: '❌ Máximo 2 decimales permitidos' };
+            }
+            return { valido: true };
+        
+        case 'numero':
+            const numero = parseFloat(valor);
+            if (isNaN(numero) || numero < 0) {
+                return { valido: false, mensaje: '❌ Debe ser un número positivo' };
+            }
+            return { valido: true };
+        
+        case 'texto':
+            if (valor.trim().length === 0) {
+                return { valido: false, mensaje: '❌ Por favor proporciona una respuesta' };
+            }
+            return { valido: true };
+        
+        default:
+            return { valido: true };
+    }
+}
 
 function abrirModalERM(pacienteId) {
     pacienteERMActual = pacienteId;
+    ermPasoActual = 0;
+    ermDatos = {};
+    
     const modal = document.getElementById('modal-erm');
     const pacienteIdSpan = document.getElementById('erm-paciente-id');
     
@@ -1556,22 +1710,103 @@ function abrirModalERM(pacienteId) {
     messagesContainer.innerHTML = `
         <div class="chat-message assistant">
             <div class="message-content">
-                👋 Bienvenido a la captura de ERM. Aquí puedes documentar la enfermedad residual mínima (ERM). Por favor, ingresa los hallazgos y observaciones relevantes.
+                👋 Bienvenido al asistente de captura de ERM. Te haré una serie de preguntas para documentar la enfermedad residual mínima. Responde con la información solicitada.
             </div>
         </div>
     `;
     
+    // Mostrar primera pregunta
+    setTimeout(() => {
+        mostrarPreguntaERM();
+    }, 500);
+    
     // Limpiar input
     const input = document.getElementById('erm-chat-input');
     input.value = '';
+    input.focus();
     
     modal.style.display = 'flex';
 }
 
-function cerrarModalERM() {
-    const modal = document.getElementById('modal-erm');
-    modal.style.display = 'none';
-    pacienteERMActual = null;
+function mostrarPreguntaERM() {
+    if (ermPasoActual >= ermPreguntas.length) {
+        guardarERM();
+        return;
+    }
+    
+    const preguntaActual = ermPreguntas[ermPasoActual];
+    const messagesContainer = document.getElementById('erm-chat-messages');
+    
+    const assistantMessageDiv = document.createElement('div');
+    assistantMessageDiv.className = 'chat-message assistant';
+    assistantMessageDiv.innerHTML = `<div class="message-content">🤔 ${preguntaActual.pregunta}</div>`;
+    messagesContainer.appendChild(assistantMessageDiv);
+    
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    const input = document.getElementById('erm-chat-input');
+    input.value = '';
+    input.focus();
+}
+
+function procesarRespuestaERM(respuesta) {
+    const respuestaTrimmed = respuesta.trim().toLowerCase();
+    
+    // Verificar que hay una pregunta actual
+    if (ermPasoActual >= ermPreguntas.length) {
+        guardarERM();
+        return;
+    }
+    
+    const preguntaActual = ermPreguntas[ermPasoActual];
+    if (!preguntaActual) {
+        guardarERM();
+        return;
+    }
+    
+    const validacion = validarRespuestaBLAST(respuesta, preguntaActual.tipo);
+    
+    const messagesContainer = document.getElementById('erm-chat-messages');
+    
+    if (!validacion.valido) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'chat-message assistant';
+        errorDiv.innerHTML = `<div class="message-content">${validacion.mensaje}</div>`;
+        messagesContainer.appendChild(errorDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        return;
+    }
+    
+    // Guardar la respuesta
+    ermDatos[preguntaActual.campo] = respuesta;
+    
+    // Mostrar confirmación
+    const confirmDiv = document.createElement('div');
+    confirmDiv.className = 'chat-message assistant';
+    confirmDiv.innerHTML = `<div class="message-content">✅ Anotado: ${respuesta}</div>`;
+    messagesContainer.appendChild(confirmDiv);
+    
+    // Manejar lógica especial para esquema_rescate
+    if (preguntaActual.campo === 'esquema_rescate') {
+        if (respuestaTrimmed === 'sí' || respuestaTrimmed === 'si') {
+            ermDatos['esquema_rescate'] = 'si';
+            // Agregar pregunta dinámica para tipo de esquema
+            ermPreguntas.splice(7, 0, { 
+                paso: 6, 
+                pregunta: '¿Cuál fue el esquema de rescate? (IDA/FLAG o IDA/MITO)', 
+                campo: 'tipo_esquema_rescate', 
+                tipo: 'texto' 
+            });
+        } else {
+            ermDatos['esquema_rescate'] = 'no';
+        }
+    }
+    
+    ermPasoActual++;
+    
+    setTimeout(() => {
+        mostrarPreguntaERM();
+    }, 800);
 }
 
 function enviarMensajeERM() {
@@ -1580,31 +1815,125 @@ function enviarMensajeERM() {
     
     if (!mensaje) return;
     
-    // Agregar mensaje del usuario
     const messagesContainer = document.getElementById('erm-chat-messages');
     const userMessageDiv = document.createElement('div');
     userMessageDiv.className = 'chat-message user';
     userMessageDiv.innerHTML = `<div class="message-content">${mensaje}</div>`;
     messagesContainer.appendChild(userMessageDiv);
     
-    // Limpiar input
     input.value = '';
-    
-    // Auto-scroll al final
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
     
-    // Simular respuesta del asistente después de un pequeño delay
     setTimeout(() => {
-        const assistantMessageDiv = document.createElement('div');
-        assistantMessageDiv.className = 'chat-message assistant';
-        assistantMessageDiv.innerHTML = `
-            <div class="message-content">
-                ✅ Nota registrada para ERM del paciente. Por favor continúa proporcionando más información si es necesario.
-            </div>
-        `;
-        messagesContainer.appendChild(assistantMessageDiv);
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    }, 500);
+        procesarRespuestaERM(mensaje);
+    }, 300);
+}
+
+async function guardarERM() {
+    const messagesContainer = document.getElementById('erm-chat-messages');
+    
+    // Mostrar mensaje de guardando
+    const guardandoDiv = document.createElement('div');
+    guardandoDiv.className = 'chat-message assistant';
+    guardandoDiv.innerHTML = `<div class="message-content">⏳ Guardando la captura de ERM...</div>`;
+    messagesContainer.appendChild(guardandoDiv);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    
+    try {
+        const response = await fetch(`${API_BASE}/api/paciente/${pacienteERMActual}/captura-erm`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(ermDatos)
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            // Mostrar respuesta natural
+            const resultadoDiv = document.createElement('div');
+            resultadoDiv.className = 'chat-message assistant';
+            resultadoDiv.innerHTML = `<div class="message-content" style="background: #e8f5e9; border-left: 4px solid #4caf50;">${data.respuesta_natural}</div>`;
+            messagesContainer.appendChild(resultadoDiv);
+            
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Actualizar contador de ERM en la tabla
+            actualizarContadorERM(pacienteERMActual);
+            
+            // Deshabilitar input
+            const input = document.getElementById('erm-chat-input');
+            input.disabled = true;
+            const sendBtn = document.getElementById('erm-chat-send-btn');
+            sendBtn.disabled = true;
+            
+            // Mostrar botón para cerrar
+            setTimeout(() => {
+                const closeDiv = document.createElement('div');
+                closeDiv.className = 'chat-message system';
+                closeDiv.innerHTML = `<div class="message-content">ERM guardada exitosamente. Cierra esta ventana para continuar.</div>`;
+                messagesContainer.appendChild(closeDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }, 500);
+        } else {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'chat-message assistant';
+            errorDiv.innerHTML = `<div class="message-content">❌ Error: ${data.message}</div>`;
+            messagesContainer.appendChild(errorDiv);
+        }
+    } catch (error) {
+        console.error('Error guardando ERM:', error);
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'chat-message assistant';
+        errorDiv.innerHTML = `<div class="message-content">❌ Error de conexión. Por favor intenta de nuevo.</div>`;
+        messagesContainer.appendChild(errorDiv);
+    }
+}
+
+async function actualizarContadorERM(pacienteId) {
+    try {
+        const response = await fetch(`${API_BASE}/api/paciente/${pacienteId}/contador-erm`);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+            // Buscar por data-paciente-id en treatment-status-cell
+            const treatmentCell = document.querySelector(`[data-paciente-id="${pacienteId}"]`);
+            if (treatmentCell) {
+                const tableRow = treatmentCell.closest('tr');
+                if (tableRow) {
+                    // Buscar el span.erm-count en la fila
+                    const ermCountSpan = tableRow.querySelector('span.erm-count');
+                    if (ermCountSpan) {
+                        ermCountSpan.textContent = data.contador_erm;
+                        console.log(`✅ Contador ERM actualizado a ${data.contador_erm} para paciente ${pacienteId}`);
+                    } else {
+                        console.warn('⚠️ No se encontró span.erm-count en la fila');
+                    }
+                } else {
+                    console.warn('⚠️ No se encontró la fila más cercana');
+                }
+            } else {
+                console.warn(`⚠️ No se encontró elemento con data-paciente-id="${pacienteId}"`);
+            }
+        }
+    } catch (error) {
+        console.error('Error actualizando contador ERM:', error);
+    }
+}
+
+function cerrarModalERM() {
+    const modal = document.getElementById('modal-erm');
+    modal.style.display = 'none';
+    pacienteERMActual = null;
+    ermPasoActual = 0;
+    ermDatos = {};
+    
+    // Resetear input y botón
+    const input = document.getElementById('erm-chat-input');
+    input.disabled = false;
+    const sendBtn = document.getElementById('erm-chat-send-btn');
+    sendBtn.disabled = false;
 }
 
 // Cerrar modal al presionar Escape
