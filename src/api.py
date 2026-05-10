@@ -652,6 +652,66 @@ async def obtener_respuesta_natural(paciente_id: str):
 
 
 # ============================================================================
+# ENDPOINT: OBTENER PLANES DE TRATAMIENTO DEL PACIENTE
+@app.get("/api/paciente/{paciente_id}/planes-tratamiento")
+async def obtener_planes_tratamiento(paciente_id: str):
+    """Obtener protocolo y fase de los planes de tratamiento del paciente"""
+    
+    try:
+        from bson import ObjectId
+        
+        if db_manager is None or not db_manager.connected:
+            return JSONResponse(status_code=503, content={"status": "error", "message": "BD no conectada"})
+        
+        # Convertir ID
+        try:
+            oid = ObjectId(paciente_id)
+        except:
+            oid = ObjectId.from_string(paciente_id) if len(paciente_id) == 24 else None
+        
+        if not oid:
+            return JSONResponse(status_code=400, content={"status": "error", "message": "ID inválido"})
+        
+        # Obtener planes de tratamiento desde la colección planes_tratamiento
+        db = db_manager.db
+        
+        # Buscar documentos con el ID del paciente
+        planes = list(db.planes_tratamiento.find(
+            {"paciente_id": paciente_id},
+            {"protocolo": 1, "fase": 1, "_id": 0}
+        ).limit(1))
+        
+        if not planes:
+            # Intentar con ObjectId si el primer intento no funciona
+            planes = list(db.planes_tratamiento.find(
+                {"paciente_id": oid},
+                {"protocolo": 1, "fase": 1, "_id": 0}
+            ).limit(1))
+        
+        if planes:
+            plan = planes[0]
+            protocolo = plan.get("protocolo", "No especificado")
+            fase = plan.get("fase", "No especificada")
+            return JSONResponse(status_code=200, content={
+                "status": "success",
+                "protocolo": protocolo,
+                "fase": fase
+            })
+        else:
+            return JSONResponse(status_code=200, content={
+                "status": "success",
+                "protocolo": "No disponible",
+                "fase": "No disponible"
+            })
+        
+    except Exception as e:
+        print(f"❌ Error al obtener planes de tratamiento: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+
+
+# ============================================================================
 # ENDPOINT: GUARDAR OTRO DIAGNÓSTICO
 @app.post("/api/paciente/{paciente_id}/otro-diagnostico")
 async def guardar_otro_diagnostico(paciente_id: str, data: dict):

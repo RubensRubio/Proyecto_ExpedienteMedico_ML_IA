@@ -331,40 +331,44 @@ function mostrarPacientes(pacientes) {
         
         // Menú contextual con opciones
         const menuAcciones = `
-            <div style="position: relative; display: inline-block;">
+            <div class="action-menu-container" style="position: relative; display: inline-block;">
                 <button 
+                    class="action-menu-btn"
                     onclick="toggleMenuAcciones(event, '${paciente.id}')"
                     style="
-                        padding: 6px 8px;
+                        padding: 8px 10px;
                         background-color: #3498db;
                         color: white;
                         border: none;
                         border-radius: 4px;
                         cursor: pointer;
-                        font-size: 1.2em;
+                        font-size: 1.4em;
+                        line-height: 1;
                     "
                     title="Acciones"
                 >
                     ⋮
                 </button>
-                <div id="menu-${paciente.id}" class="menu-acciones" style="display: none; position: absolute; top: 30px; right: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 180px;">
-                    <button onclick="mostrarResultado('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #eee;">📊 Mostrar Resultado</button>
-                    <button onclick="abrirModalOtroDiagnostico('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer; font-size: 0.9em; border-bottom: 1px solid #eee;">📋 Otro Diagnóstico</button>
-                    <button onclick="abrirModalDefuncion('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 10px; border: none; background: none; cursor: pointer; font-size: 0.9em; color: #c0392b;">⚰️ Defunción</button>
+                <div id="menu-${paciente.id}" class="menu-acciones" style="display: none; background: white; border: 1px solid #ddd; border-radius: 4px;">
+                    <button onclick="mostrarResultado('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 12px 15px; border: none; background: none; cursor: pointer; font-size: 0.95em; border-bottom: 1px solid #eee;">📊 Mostrar Resultado</button>
+                    <button onclick="abrirModalOtroDiagnostico('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 12px 15px; border: none; background: none; cursor: pointer; font-size: 0.95em; border-bottom: 1px solid #eee;">📋 Otro Diagnóstico</button>
+                    <button onclick="abrirModalDefuncion('${paciente.id}'); cerrarMenuAcciones('${paciente.id}')" style="display: block; width: 100%; text-align: left; padding: 12px 15px; border: none; background: none; cursor: pointer; font-size: 0.95em; color: #c0392b;">⚰️ Defunción</button>
                 </div>
             </div>
         `;
 
         const row = document.createElement('tr');
+        
         row.innerHTML = `
-            <td style="padding: 8px 6px;"><code style="font-weight: bold; font-size: 0.85em;">${paciente.id.substring(0, 12)}...</code></td>
-            <td style="padding: 8px 6px; text-align: center;">${paciente.tipo_leucemia || 'N/A'}</td>
-            <td style="padding: 8px 6px; text-align: center;">
+            <td style="padding: 14px 10px; text-align: left;"><code style="font-weight: bold; font-size: 1em;">${paciente.id.substring(0, 12)}...</code></td>
+            <td style="padding: 14px 10px; text-align: center; font-size: 1em;">${paciente.tipo_leucemia || 'N/A'}</td>
+            <td style="padding: 14px 10px; text-align: center;">
                 <span style="
-                    padding: 4px 8px; 
+                    padding: 6px 10px; 
                     border-radius: 4px;
-                    font-size: 0.85em;
+                    font-size: 1em;
                     font-weight: 500;
+                    display: inline-block;
                     ${paciente.estado === 'Tratamiento' ? 'background: #c8e6c9; color: #2e7d32;' : 
                       paciente.estado === 'Defunción' ? 'background: #ffcdd2; color: #c62828;' :
                       paciente.estado === 'Cuidados paliativos' ? 'background: #ffe0b2; color: #e65100;' :
@@ -374,12 +378,13 @@ function mostrarPacientes(pacientes) {
                     ${paciente.estado}
                 </span>
             </td>
-            <td style="padding: 8px 6px; text-align: center;">
+            <td style="padding: 14px 10px; text-align: center;">
                 <span style="
-                    padding: 4px 8px;
+                    padding: 6px 10px;
                     border-radius: 4px;
-                    font-size: 0.85em;
+                    font-size: 1em;
                     font-weight: 500;
+                    display: inline-block;
                     ${paciente.riesgo_calculado === 'Riesgo alto' ? 'background: #ffcdd2; color: #c62828;' :
                       paciente.riesgo_calculado === 'Riesgo intermedio' ? 'background: #fff3cd; color: #856404;' :
                       'background: #d4edda; color: #155724;'}
@@ -387,25 +392,85 @@ function mostrarPacientes(pacientes) {
                     ${paciente.riesgo_calculado || '-'}
                 </span>
             </td>
-            <td style="padding: 8px 6px; text-align: center;">
-                <span title="${paciente.estatus_tratamiento ? 'Tratamiento aplicado y fase' : 'Sin tratamiento'}${paciente.estatus_tratamiento ? ': ' + paciente.estatus_tratamiento : ''}" style="
-                    padding: 4px 8px;
+            <td style="padding: 14px 10px; text-align: center; position: relative;">
+                <span class="treatment-status-cell" data-paciente-id="${paciente.id}" style="
+                    padding: 6px 10px;
                     border-radius: 4px;
-                    font-size: 0.85em;
+                    font-size: 1em;
                     font-weight: 500;
+                    display: inline-block;
                     cursor: help;
+                    border-bottom: 2px dotted #0056b3;
                     ${paciente.estatus_tratamiento === 'Proceso' ? 'background: #fff3cd; color: #856404;' :
                       paciente.estatus_tratamiento === 'Completado' ? 'background: #d4edda; color: #155724;' :
                       'background: #e2e3e5; color: #383d41;'}
                 ">
                     ${paciente.estatus_tratamiento || '-'}
                 </span>
+                <div class="custom-tooltip treatment-tooltip" style="
+                    display: none;
+                    position: absolute;
+                    background: white;
+                    border: 1px solid #ddd;
+                    border-radius: 4px;
+                    padding: 10px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                    z-index: 1000;
+                    min-width: 200px;
+                    top: 100%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    margin-top: 5px;
+                    font-size: 0.9em;
+                    line-height: 1.4;
+                    white-space: normal;
+                    color: #333;
+                ">
+                    <div style="font-weight: bold; margin-bottom: 8px;">Información del Tratamiento</div>
+                    <div style="margin-bottom: 5px;"><strong>Protocolo:</strong> <span class="plan-protocolo">Cargando...</span></div>
+                    <div><strong>Fase:</strong> <span class="plan-fase">Cargando...</span></div>
+                </div>
             </td>
-            <td style="padding: 8px 6px; text-align: center; font-size: 0.85em;">${fechaTratamiento}</td>
-            <td style="padding: 8px 6px; text-align: center; font-size: 0.85em;">${fechaFormato}</td>
-            <td style="padding: 8px 6px; text-align: center;">${menuAcciones}</td>
+            <td style="padding: 14px 10px; text-align: center; font-size: 1em;">${fechaTratamiento}</td>
+            <td style="padding: 14px 10px; text-align: center; font-size: 1em;">${fechaFormato}</td>
+            <td style="padding: 14px 10px; text-align: center;">${menuAcciones}</td>
         `;
         tbody.appendChild(row);
+        
+        // Agregar event listeners para el tooltip personalizado de tratamiento
+        const treatmentCell = row.querySelector('.treatment-status-cell');
+        const treatmentTooltip = row.querySelector('.treatment-tooltip');
+        
+        if (treatmentCell && treatmentTooltip) {
+            treatmentCell.addEventListener('mouseover', async (e) => {
+                treatmentTooltip.style.display = 'block';
+                
+                // Cargar datos de planes de tratamiento
+                const protocoValue = treatmentTooltip.querySelector('.plan-protocolo');
+                const faseValue = treatmentTooltip.querySelector('.plan-fase');
+                
+                try {
+                    const response = await fetch(`/api/paciente/${paciente.id}/planes-tratamiento`);
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        protocoValue.textContent = data.protocolo || 'No especificado';
+                        faseValue.textContent = data.fase || 'No especificada';
+                    } else {
+                        protocoValue.textContent = 'Error al cargar';
+                        faseValue.textContent = 'Error al cargar';
+                    }
+                } catch (error) {
+                    console.error('Error cargando planes de tratamiento:', error);
+                    protocoValue.textContent = 'Error al cargar';
+                    faseValue.textContent = 'Error al cargar';
+                }
+            });
+            
+            treatmentCell.addEventListener('mouseout', () => {
+                treatmentTooltip.style.display = 'none';
+            });
+        }
     });
 
     contador.textContent = `Total: ${pacientes.length} paciente${pacientes.length !== 1 ? 's' : ''}`;
@@ -1238,7 +1303,24 @@ function toggleMenuAcciones(event, pacienteId) {
     document.querySelectorAll('.menu-acciones').forEach(m => m.style.display = 'none');
     
     if (!isVisible) {
+        // Posicionar el menú correctamente usando fixed o absolute
+        const button = event.target.closest('button');
+        const rect = button.getBoundingClientRect();
+        
         menu.style.display = 'block';
+        menu.style.position = 'fixed';
+        menu.style.top = (rect.bottom + 5) + 'px';
+        menu.style.left = (rect.left - 180 + rect.width) + 'px';
+        menu.style.backgroundColor = 'white';
+        menu.style.border = '1px solid #ddd';
+        menu.style.borderRadius = '4px';
+        menu.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+        
+        // Ajustar si el menú se sale de la pantalla por la derecha
+        if (rect.left - 180 + rect.width + 180 > window.innerWidth) {
+            menu.style.left = (rect.left - 180) + 'px';
+        }
+        
         pacientesMenuActivos[pacienteId] = true;
     } else {
         menu.style.display = 'none';
@@ -1268,21 +1350,59 @@ async function mostrarResultado(pacienteId) {
         
         if (data.status === 'success') {
             const contenido = document.getElementById('modal-resultado-contenido');
-            let html = `<strong>📋 Estado:</strong> ${data.estado}<br><br>`;
+            let html = `<div style="padding: 10px 0;">`;
             
+            // Estado
+            html += `<div style="margin-bottom: 15px;">`;
+            html += `<strong style="font-size: 1.1em;">📋 Estado del Paciente:</strong><br>`;
+            html += `<span style="
+                padding: 6px 12px; 
+                border-radius: 4px;
+                display: inline-block;
+                margin-top: 8px;
+                ${data.estado === 'Tratamiento' ? 'background: #c8e6c9; color: #2e7d32;' : 
+                  data.estado === 'Defunción' ? 'background: #ffcdd2; color: #c62828;' :
+                  data.estado === 'Otro diagnóstico' ? 'background: #d7bde2; color: #6c3483;' :
+                  'background: #b3e5fc; color: #01579b;'}
+            ">${data.estado}</span>`;
+            html += `</div>`;
+            
+            // Riesgo calculado
             if (data.riesgo_calculado && data.riesgo_calculado !== '-') {
-                html += `<strong>⚠️ Riesgo Calculado:</strong> <span style="color: ${
-                    data.riesgo_calculado === 'Riesgo alto' ? '#c62828' :
-                    data.riesgo_calculado === 'Riesgo intermedio' ? '#856404' :
-                    '#155724'
-                }">${data.riesgo_calculado}</span><br><br>`;
+                html += `<div style="margin-bottom: 15px;">`;
+                html += `<strong style="font-size: 1.1em;">⚠️ Riesgo Calculado:</strong><br>`;
+                html += `<span style="
+                    padding: 6px 12px; 
+                    display: inline-block;
+                    margin-top: 8px;
+                    border-radius: 4px;
+                    color: white;
+                    font-weight: bold;
+                    ${
+                        data.riesgo_calculado === 'Riesgo alto' ? 'background: #c62828;' :
+                        data.riesgo_calculado === 'Riesgo intermedio' ? 'background: #f39c12;' :
+                        'background: #27ae60;'
+                    }
+                ">${data.riesgo_calculado}</span>`;
+                html += `</div>`;
             }
+            
+            // Diagnóstico/Resultado
+            html += `<div style="margin-bottom: 15px;">`;
+            html += `<strong style="font-size: 1.1em;">📊 Análisis Clínico:</strong><br>`;
             
             if (data.respuesta_natural && data.respuesta_natural !== 'No disponible') {
-                html += `<strong>📊 Diagnóstico:</strong><br><pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; white-space: pre-wrap; word-wrap: break-word;">${data.respuesta_natural}</pre>`;
+                html += `<div style="background: #f9f9f9; padding: 12px; border-radius: 4px; border-left: 4px solid #1565C0; margin-top: 8px; font-size: 0.95em; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; color: #333;">${data.respuesta_natural}</div>`;
             } else {
-                html += `<p style="color: #999;">No hay diagnóstico disponible aún.</p>`;
+                html += `<div style="background: #ffffcc; padding: 12px; border-radius: 4px; border-left: 4px solid #f39c12; margin-top: 8px; color: #856404;">
+                    ℹ️ <strong>Diagnóstico no disponible aún</strong><br>
+                    Este paciente fue registrado antes de la generación automática de diagnósticos. 
+                    El análisis se generará automáticamente con los próximos registros.
+                </div>`;
             }
+            html += `</div>`;
+            
+            html += `</div>`;
             
             contenido.innerHTML = html;
             document.getElementById('modal-resultado').style.display = 'flex';

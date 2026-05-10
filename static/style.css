@@ -527,6 +527,17 @@ footer {
 .menu-acciones {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     animation: slideIn 0.2s ease-out;
+    z-index: 2000 !important;
+    position: fixed !important;
+    width: 180px;
+}
+
+.menu-acciones button {
+    width: 100% !important;
+    padding: 12px 15px !important;
+    font-size: 0.95em !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .menu-acciones button:hover {
@@ -607,7 +618,8 @@ footer {
 /* ========================================================================== */
 
 .tabla-pacientes {
-    font-size: 0.9em;
+    font-size: 1em;
+    line-height: 1.6;
 }
 
 .tabla-pacientes thead th {
@@ -615,21 +627,31 @@ footer {
     font-weight: 600;
     border-bottom: 2px solid #ddd;
     white-space: nowrap;
+    padding: 14px 10px !important;
+    font-size: 1em;
 }
 
 .tabla-pacientes tbody td {
     border-bottom: 1px solid #eee;
-    padding: 10px 8px;
+    padding: 14px 10px !important;
+    font-size: 1em;
+    height: 45px;
+    vertical-align: middle;
 }
 
 .tabla-pacientes tbody tr:hover {
     background-color: #fafafa;
 }
 
+.tabla-pacientes tbody tr {
+    transition: background-color 0.2s ease;
+}
+
 /* Tooltip para Estado de Tratamiento */
 span[title] {
-    border-bottom: 1px dotted #999;
+    border-bottom: 2px dotted #0056b3;
     cursor: help;
+    position: relative;
 }
 
 span[title]:hover::after {
@@ -637,14 +659,30 @@ span[title]:hover::after {
     position: absolute;
     background-color: #333;
     color: white;
-    padding: 8px 12px;
-    border-radius: 4px;
-    font-size: 0.85em;
-    white-space: nowrap;
-    z-index: 1;
-    bottom: 120%;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    z-index: 2000;
+    bottom: calc(100% + 10px);
     left: 50%;
     transform: translateX(-50%);
     pointer-events: none;
+    min-width: 200px;
+    text-align: center;
+    border: 1px solid #555;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+span[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #333;
+    z-index: 2000;
 }
 }
